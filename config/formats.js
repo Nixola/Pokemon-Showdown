@@ -321,16 +321,52 @@ exports.Formats = [
 		name: "[Gen 7] Type scramble",
 		searchShow: false,
 		ruleset: ['[Gen 7] Doubles OU'],
-		mod: 'gen7',
+		mod: 'typescramble',
+		gameType: 'doubles',
 		banlist: [],
-		onResidual: function(pokemon) {
-			let typeKeys = Object.keys(this.data.TypeChart);
-			let types = [keys[keys.length * Math.random() << 0].toLowerCase()];
-			let type2 = keys[keys.length * Math.random() << 0].toLowerCase();
-			type2 != types[0] && types.push(type2);
-			pokemon.template.types = types;
-			pokemon.types = types;
-			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		onResidual: function(battle) {
+			let mons = [];
+			mons.push(battle.p1.active[0]);
+			mons.push(battle.p1.active[1]);
+			mons.push(battle.p2.active[0]);
+			mons.push(battle.p2.active[1]);
+			for (let i = 0; i < mons.length; i++) {
+				let pokemon = mons[i];
+				console.log("1Mon " + i);
+				if (pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) continue;
+				console.log("2Mon " + i);
+				let typeKeys = Object.keys(this.data.TypeChart);
+				let types = [typeKeys[this.random(typeKeys.length)]];
+				let type2 = typeKeys[this.random(typeKeys.length)];
+				type2 != types[0] && types.push(type2);
+
+				//pokemon.template.types = types;
+				//pokemon.baseTemplate.types = types;
+				//pokemon.types = types;
+				pokemon.setType(types.join('/'));
+
+				this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[from] exposure to koeboe');
+
+				if (pokemon.volatiles['forestscurse']) {
+					if (!(types[0] == 'Grass' || types[1] == 'Grass')) {
+						let addGrass = pokemon.addType('Grass');
+						if (addGrass) {
+							console.log("Adding grass on", pokemon.id);
+							this.add('-start', pokemon, 'typeadd', 'Grass', '[silent]');
+						}
+					}
+				}
+				if (pokemon.volatiles['trickortreat']) {
+					if (!(types[0] == 'Ghost' || types[1] == 'Ghost')) {
+						let addGhost = pokemon.addType('Ghost');
+						if (addGhost) {
+							console.log("Adding ghost on", pokemon.id);
+							this.add('-start', pokemon, 'typeadd', 'Ghost', '[silent]');
+						}
+					}
+				}
+
+			}
 		}
 	},
 	{
