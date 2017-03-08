@@ -335,9 +335,8 @@ exports.Formats = [
 			mons.push(battle.p2.active[1]);
 			for (let i = 0; i < mons.length; i++) {
 				let pokemon = mons[i];
-				console.log("1Mon " + i);
+				console.log("Mon " + pokemon.id);
 				if (pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) continue;
-				console.log("2Mon " + i);
 				let typeKeys = Object.keys(this.data.TypeChart);
 				let types = [typeKeys[this.random(typeKeys.length)]];
 				let type2 = typeKeys[this.random(typeKeys.length)];
@@ -346,7 +345,7 @@ exports.Formats = [
 				//pokemon.template.types = types;
 				//pokemon.baseTemplate.types = types;
 				//pokemon.types = types;
-				pokemon.setType(types.join('/'));
+				pokemon.setType(types);
 
 				this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[from] exposure to koeboe');
 
