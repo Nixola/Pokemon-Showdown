@@ -319,6 +319,9 @@ exports.Formats = [
 	},
 	{
 		name: "[Gen 7] Type scramble",
+		desc: [
+			"At the end of every turn, the type of every Pok&egrave;mon on the field randomly changes.",
+			"Moves that change types act as volatile status."],
 		searchShow: false,
 		ruleset: ['[Gen 7] Doubles OU'],
 		mod: 'typescramble',
