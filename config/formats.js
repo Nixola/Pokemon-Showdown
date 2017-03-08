@@ -318,6 +318,22 @@ exports.Formats = [
 		},
 	},
 	{
+		name: "[Gen 7] Type scramble",
+		searchShow: false,
+		ruleset: ['[Gen 7] Doubles OU'],
+		mod: 'gen7',
+		banlist: [],
+		onResidual: function(pokemon) {
+			let typeKeys = Object.keys(this.data.TypeChart);
+			let types = [keys[keys.length * Math.random() << 0].toLowerCase()];
+			let type2 = keys[keys.length * Math.random() << 0].toLowerCase();
+			type2 != types[0] && types.push(type2);
+			pokemon.template.types = types;
+			pokemon.types = types;
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		}
+	},
+	{
 		section: "Other Metagames",
 		column: 2,
 	},
