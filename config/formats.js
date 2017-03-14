@@ -336,7 +336,9 @@ exports.Formats = [
 			for (let i = 0; i < mons.length; i++) {
 				let pokemon = mons[i];
 				console.log("Mon " + pokemon.id);
-				if (pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) continue;
+				if ((!pokemon.hp || pokemon.hp < 0) || 
+            pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
+              continue;
 				let typeKeys = Object.keys(this.data.TypeChart);
 				let types = [typeKeys[this.random(typeKeys.length)]];
 				let type2 = typeKeys[this.random(typeKeys.length)];
@@ -371,6 +373,64 @@ exports.Formats = [
 			}
 		}
 	},
+  {
+		name: "[Gen 7] RND Type scramble",
+		desc: [
+			"At the end of every turn, the type of every Pok&egrave;mon on the field randomly changes.",
+			"Moves that change types act as volatile status."],
+		searchShow: false,
+    team: 'random',
+		ruleset: ['[Gen 7] Doubles OU'],
+		mod: 'typescramble',
+		gameType: 'doubles',
+		banlist: [],
+		onResidual: function(battle) {
+			let mons = [];
+			mons.push(battle.p1.active[0]);
+			mons.push(battle.p1.active[1]);
+			mons.push(battle.p2.active[0]);
+			mons.push(battle.p2.active[1]);
+			for (let i = 0; i < mons.length; i++) {
+				let pokemon = mons[i];
+				console.log("Mon " + pokemon.id);
+				if ((!pokemon.hp || pokemon.hp < 0) || 
+            pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
+              continue;
+				let typeKeys = Object.keys(this.data.TypeChart);
+				let types = [typeKeys[this.random(typeKeys.length)]];
+				let type2 = typeKeys[this.random(typeKeys.length)];
+				type2 != types[0] && types.push(type2);
+
+				//pokemon.template.types = types;
+				//pokemon.baseTemplate.types = types;
+				//pokemon.types = types;
+				pokemon.setType(types);
+
+				this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[from] exposure to koeboe');
+
+				if (pokemon.volatiles['forestscurse']) {
+					if (!(types[0] == 'Grass' || types[1] == 'Grass')) {
+						let addGrass = pokemon.addType('Grass');
+						if (addGrass) {
+							console.log("Adding grass on", pokemon.id);
+							this.add('-start', pokemon, 'typeadd', 'Grass', '[silent]');
+						}
+					}
+				}
+				if (pokemon.volatiles['trickortreat']) {
+					if (!(types[0] == 'Ghost' || types[1] == 'Ghost')) {
+						let addGhost = pokemon.addType('Ghost');
+						if (addGhost) {
+							console.log("Adding ghost on", pokemon.id);
+							this.add('-start', pokemon, 'typeadd', 'Ghost', '[silent]');
+						}
+					}
+				}
+
+			}
+		}
+	},
+
 	{
 		section: "Other Metagames",
 		column: 2,
