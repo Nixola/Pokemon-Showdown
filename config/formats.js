@@ -61,7 +61,7 @@ exports.Formats = [
 		banlist: ['OU', 'BL', 'Drizzle', 'Power Construct', 'Mewnium Z', 'Baton Pass'],
 	},
 	{
-		name: "[Gen 7] RU (alpha)",
+		name: "[Gen 7] RU (beta)",
 		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3587352/\">RU Metagame Discussion</a>"],
 
 		mod: 'gen7',
@@ -213,8 +213,8 @@ exports.Formats = [
 		mod: 'gen7',
 		gameType: 'doubles',
 		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
-		banlist: ['Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Kyogre', 'Kyurem-White', 'Lugia',
-			'Lunala', 'Magearna', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
+		banlist: ['Arceus', 'Dialga', 'Giratina', 'Giratina-Origin', 'Groudon', 'Ho-Oh', 'Jirachi', 'Kyogre', 'Kyurem-White',
+			'Lugia', 'Lunala', 'Magearna', 'Mewtwo', 'Palkia', 'Rayquaza', 'Reshiram', 'Solgaleo', 'Xerneas', 'Yveltal', 'Zekrom',
 			'Power Construct', 'Eevium Z', 'Dark Void', 'Gravity ++ Grass Whistle', 'Gravity ++ Hypnosis', 'Gravity ++ Lovely Kiss', 'Gravity ++ Sing', 'Gravity ++ Sleep Powder',
 		],
 	},
@@ -223,8 +223,24 @@ exports.Formats = [
 
 		mod: 'gen7',
 		gameType: 'doubles',
-		ruleset: ['Pokemon', 'Species Clause', 'Moody Clause', 'OHKO Clause', 'Evasion Moves Clause', 'Evasion Abilities Clause', 'Endless Battle Clause', 'HP Percentage Mod', 'Cancel Mod', 'Team Preview'],
+		ruleset: ['Pokemon', 'Standard Doubles', 'Team Preview'],
 		banlist: ['Illegal', 'Unreleased', 'Dark Void'],
+	},
+	{
+		name: "[Gen 7] Doubles UU",
+		desc: ["&bullet; <a href=\"https://www.smogon.com/forums/threads/3598014/\">Doubles UU Metagame Discussion</a>"],
+
+		mod: 'gen7',
+		gameType: 'doubles',
+		ruleset: ['[Gen 7] Doubles OU'],
+		banlist: [
+			'Aegislash', 'Amoonguss', 'Araquanid', 'Arcanine', 'Azumarill', 'Bronzong', 'Celesteela', 'Cresselia',
+			'Deoxys-Attack', 'Diancie', 'Excadrill', 'Ferrothorn', 'Garchomp', 'Gastrodon', 'Heatran', 'Hoopa-Unbound', 'Jirachi',
+			'Kartana', 'Kingdra', 'Landorus-Therian', 'Marowak-Alola', 'Milotic', 'Mimikyu', 'Muk-Alola', 'Ninetales-Alola',
+			'Oranguru', 'Pelipper', 'Politoed', 'Porygon2', 'Rotom-Wash', 'Shaymin-Sky', 'Tapu Bulu', 'Tapu Fini',
+			'Tapu Koko', 'Tapu Lele', 'Tyranitar', 'Volcanion', 'Volcarona', 'Weavile', 'Whimsicott', 'Zapdos', 'Zygarde-Base',
+			'Battle Bond', 'Charizardite Y', 'Gengarite', 'Gyaradosite', 'Kangaskhanite', 'Metagrossite', 'Salamencite',
+		],
 	},
 	{
 		name: "[Gen 7] VGC 2017",
@@ -283,8 +299,8 @@ exports.Formats = [
 		],
 
 		mod: 'fullpotential',
-		ruleset: ['[Gen 7] OU'],
-		banlist: ['Dugtrio-Base', 'Pheromosa', 'Shuckle', 'Speed Boost'],
+		ruleset: ['[Gen 7] OU', 'Item Clause'],
+		banlist: ['Dugtrio-Base', 'Pheromosa', 'Shuckle', 'Speed Boost', 'Unburden'],
 	},
 	{
 		name: "[Gen 7] Automagic",
@@ -435,6 +451,28 @@ exports.Formats = [
 		section: "Other Metagames",
 		column: 2,
 	},
+  {
+    name: "[Gen 7] Consolation Prize",
+    desc : [
+      " Pokemon have their lowest stat doubled. This does not take into account items, setup moves or abilities, it doubles the lowest raw stat.",
+      "If a pokemon has more than one lowest stat (Say, like a no EV neutral nature mew for example) no boost will be received. HP does not count as a \"Lowest Stat\". " ],
+    mod: 'consolationprize',
+    ruleset: ['[Gen 7] OU'],
+    banlist: ['Celebi', 'Jirachi', 'Manaphy', 'Mew', 'Shaymin', 'Victini', 'Metagrossite'],
+    onModifiedTemplate: function(template, mon) {
+      let lowest;
+      let lowestValue = 999;
+      for (var stat in mon.stats) {
+        if (mon.stats[stat] < lowestValue) {
+          lowestValue = mon.stats[stat];
+          lowest = stat;
+        } else if (mon.stats[stat] == lowestValue)
+          return;
+      }
+      mon.stats[lowest] *= 2;
+      mon.baseStats[lowest] *= 2;
+    },
+  },
 	{
 		name: "[Gen 7] Balanced Hackmons",
 		desc: [
@@ -486,7 +524,7 @@ exports.Formats = [
 		],
 	},
 	{
-		name: "[Gen 7] Mix and Mega",
+		name: "[Gen 7] Mix and Mega (suspect test)",
 		desc: [
 			"Mega Stones and Primal Orbs can be used on almost any fully evolved Pok&eacute;mon with no Mega Evolution limit.",
 			"&bullet; <a href=\"https://www.smogon.com/forums/threads/3587740/\">Mix and Mega</a>",
@@ -590,7 +628,7 @@ exports.Formats = [
 			'Power Construct', 'Shadow Tag', 'Gengarite', 'Kangaskhanite', 'Lucarionite', 'Salamencite',
 			'Arena Trap + Dark Void', 'Arena Trap + Grass Whistle', 'Arena Trap + Hypnosis', 'Arena Trap + Relic Song', 'Arena Trap + Sing', 'Arena Trap + Sleep Powder',
 		],
-		noSketch: ['Celebrate', 'Conversion', "Forest's Curse", 'Geomancy', 'Happy Hour', 'Hold Hands', 'Lovely Kiss', 'Purify', 'Shell Smash', 'Shift Gear', 'Sketch', 'Spore', 'Trick-or-Treat'],
+		noSketch: ['Belly Drum', 'Celebrate', 'Conversion', "Forest's Curse", 'Geomancy', 'Happy Hour', 'Hold Hands', 'Lovely Kiss', 'Purify', 'Shell Smash', 'Shift Gear', 'Sketch', 'Spore', 'Trick-or-Treat'],
 		onValidateTeam: function (team) {
 			let sketchedMoves = {};
 			for (let i = 0; i < team.length; i++) {
