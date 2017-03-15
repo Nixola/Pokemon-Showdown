@@ -337,6 +337,28 @@ exports.Formats = [
 		section: "Other Metagames",
 		column: 2,
 	},
+  {
+    name: "[Gen 7] Consolation Prize",
+    desc : [
+      " Pokemon have their lowest stat doubled. This does not take into account items, setup moves or abilities, it doubles the lowest raw stat.",
+      "If a pokemon has more than one lowest stat (Say, like a no EV neutral nature mew for example) no boost will be received. HP does not count as a \"Lowest Stat\". " ],
+    mod: 'consolationprize',
+    ruleset: ['[Gen 7] OU'],
+    banlist: ['Celebi', 'Jirachi', 'Manaphy', 'Mew', 'Shaymin', 'Victini', 'Metagrossite'],
+    onModifiedTemplate: function(template, mon) {
+      let lowest;
+      let lowestValue = 999;
+      for (var stat in mon.stats) {
+        if (mon.stats[stat] < lowestValue) {
+          lowestValue = mon.stats[stat];
+          lowest = stat;
+        } else if (mon.stats[stat] == lowestValue)
+          return;
+      }
+      mon.stats[lowest] *= 2;
+      mon.baseStats[lowest] *= 2;
+    },
+  },
 	{
 		name: "[Gen 7] Balanced Hackmons",
 		desc: [
