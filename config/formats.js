@@ -338,6 +338,35 @@ exports.Formats = [
 		column: 2,
 	},
 	{
+		name: "[Gen7 ] Camomons",
+		desc: [
+			"",
+			"&bullet; <a href=\"http://www.smogon.com/forums/threads/camomons.3598418/\">Camomons</a>"
+		],
+		mod: 'gen7',
+		ruleset: ['Gen7 OU'],
+		onModifyTemplate: function(template, pokemon) {
+			let types = [];
+			types.push(this.getMove(pokemon.moves[0]).type);
+			if (pokemon.moves[1]) {
+				let type2 = this.getMove(pokemon.moves[1]).type;
+				type2 != types[0] && types.push(type2);
+			}
+			pokemon.setType(types);
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		},
+		onAfterMega: function(pokemon) {
+			let types = [];
+			types.push(this.getMove(pokemon.moves[0]).type);
+			if (pokemon.moves[1]) {
+				let type2 = this.getMove(pokemon.moves[1]).type;
+				type2 != types[0] && types.push(type2);
+			}
+			pokemon.setType(types);
+			this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+		},
+	},
+	{
 		name: "[Gen 7] Balanced Hackmons",
 		desc: [
 			"Anything that can be hacked in-game and is usable in local battles is allowed.",
