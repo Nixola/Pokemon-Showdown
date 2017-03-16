@@ -353,8 +353,8 @@ exports.Formats = [
 				let pokemon = mons[i];
 				console.log("Mon " + pokemon.id);
 				if ((!pokemon.hp || pokemon.hp < 0) || 
-            pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
-              continue;
+						pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
+							continue;
 				let typeKeys = Object.keys(this.data.TypeChart);
 				let types = [typeKeys[this.random(typeKeys.length)]];
 				let type2 = typeKeys[this.random(typeKeys.length)];
@@ -389,13 +389,13 @@ exports.Formats = [
 			}
 		}
 	},
-  {
+	{
 		name: "[Gen 7] RND Type scramble",
 		desc: [
 			"At the end of every turn, the type of every Pok&egrave;mon on the field randomly changes.",
 			"Moves that change types act as volatile status."],
 		searchShow: false,
-    team: 'random',
+		team: 'random',
 		ruleset: ['[Gen 7] Doubles OU'],
 		mod: 'typescramble',
 		gameType: 'doubles',
@@ -410,8 +410,8 @@ exports.Formats = [
 				let pokemon = mons[i];
 				console.log("Mon " + pokemon.id);
 				if ((!pokemon.hp || pokemon.hp < 0) || 
-            pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
-              continue;
+						pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
+							continue;
 				let typeKeys = Object.keys(this.data.TypeChart);
 				let types = [typeKeys[this.random(typeKeys.length)]];
 				let type2 = typeKeys[this.random(typeKeys.length)];
@@ -451,28 +451,28 @@ exports.Formats = [
 		section: "Other Metagames",
 		column: 2,
 	},
-  {
-    name: "[Gen 7] Consolation Prize",
-    desc : [
-      " Pokemon have their lowest stat doubled. This does not take into account items, setup moves or abilities, it doubles the lowest raw stat.",
-      "If a pokemon has more than one lowest stat (Say, like a no EV neutral nature mew for example) no boost will be received. HP does not count as a \"Lowest Stat\". " ],
-    mod: 'consolationprize',
-    ruleset: ['[Gen 7] OU'],
-    banlist: ['Celebi', 'Jirachi', 'Manaphy', 'Mew', 'Shaymin', 'Victini', 'Metagrossite'],
-    onModifiedTemplate: function(template, mon) {
-      let lowest;
-      let lowestValue = 999;
-      for (var stat in mon.stats) {
-        if (mon.stats[stat] < lowestValue) {
-          lowestValue = mon.stats[stat];
-          lowest = stat;
-        } else if (mon.stats[stat] == lowestValue)
-          return;
-      }
-      mon.stats[lowest] *= 2;
-      mon.baseStats[lowest] *= 2;
-    },
-  },
+	{
+		name: "[Gen 7] Consolation Prize",
+		desc : [
+			" Pokemon have their lowest stat doubled. This does not take into account items, setup moves or abilities, it doubles the lowest raw stat.",
+			"If a pokemon has more than one lowest stat (Say, like a no EV neutral nature mew for example) no boost will be received. HP does not count as a \"Lowest Stat\". " ],
+		mod: 'consolationprize',
+		ruleset: ['[Gen 7] OU'],
+		banlist: ['Celebi', 'Jirachi', 'Manaphy', 'Mew', 'Shaymin', 'Victini', 'Metagrossite'],
+		onModifiedTemplate: function(template, mon) {
+			let lowest;
+			let lowestValue = 999;
+			for (var stat in mon.stats) {
+				if (mon.stats[stat] < lowestValue) {
+					lowestValue = mon.baseStats[stat];
+					lowest = stat;
+				} else if (mon.baseStats[stat] == lowestValue)
+					return;
+			}
+			mon.stats[lowest] *= 2;
+			mon.baseStats[lowest] *= 2;
+		},
+	},
 	{
 		name: "[Gen 7] Balanced Hackmons",
 		desc: [
