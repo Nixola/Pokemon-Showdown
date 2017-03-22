@@ -305,7 +305,7 @@ exports.Formats = [
 		onAfterSecondaryEffect: function (target, source, move) {
 			let moreSetup = ['acupressure', 'bellydrum', 'stockpile'];
 			if (!source.types.includes("Ghost")) moreSetup.push("curse");
-			source.baseMoveset.forEach(curmove => {
+			source.moveset.forEach(curmove => {
 				let move = this.getMove(curmove.id);
 				if (moreSetup.includes(move.id) || (move.category === "Status" && move.boosts && move.target === "self")) {
 					this.useMove(move, source);
