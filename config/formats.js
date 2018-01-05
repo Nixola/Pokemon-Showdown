@@ -545,7 +545,7 @@ exports.Formats = [
 		gameType: 'doubles',
 		banlist: [],
     onModifyTemplate: function(template, pokemon, source) {
-      //console.log(source);
+      if (!pokemon.active) return;
       this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
       return Object.assign({}, template, {types: pokemon.types});
     },
@@ -613,7 +613,7 @@ exports.Formats = [
 		gameType: 'doubles',
 		banlist: [],
     onModifyTemplate: function(template, pokemon, source) {
-      //console.log(source);
+      if (!pokemon.active) return;
       this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
       return Object.assign({}, template, {types: pokemon.types});
     },
