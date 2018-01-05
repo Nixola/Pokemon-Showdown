@@ -98,13 +98,13 @@ const TRIPLES_TEAMS = {
 
 let battle;
 
-describe('Decisions', function () {
+describe('Choices', function () {
 	afterEach(function () {
 		battle.destroy();
 	});
 
 	describe('Generic', function () {
-		it('should wait for players to send their decisions and run them as soon as they are all received', function (done) {
+		it('should wait for players to send their choicess and run them as soon as they are all received', function (done) {
 			battle = common.createBattle();
 			battle.join('p1', 'Guest 1', 1, [{species: "Mew", ability: 'synchronize', moves: ['recover']}]);
 			battle.join('p2', 'Guest 2', 1, [{species: "Rhydon", ability: 'prankster', moves: ['sketch']}]);
@@ -117,38 +117,6 @@ describe('Decisions', function () {
 				assert.strictEqual(battle.turn, 2);
 				done();
 			}, 40);
-		});
-
-		it('should allow input of move commands in a per Pokémon basis', function () {
-			battle = common.createBattle({gameType: 'doubles', partialDecisions: true}, [
-				[{species: "Mew", ability: 'synchronize', moves: ['recover']}, {species: "Bulbasaur", ability: 'overgrow', moves: ['growl', 'synthesis']}],
-				[{species: "Pupitar", ability: 'shedskin', moves: ['surf']}, {species: "Arceus", ability: 'multitype', moves: ['calmmind']}],
-				// Pupitar is faster than Bulbasaur
-			]);
-
-			battle.choose('p1', 'move recover');
-			battle.choose('p1', 'move growl');
-			battle.choose('p2', 'move surf');
-			battle.choose('p2', 'move calmmind');
-
-			assert.strictEqual(battle.turn, 2);
-			assert.statStage(battle.p2.active[0], 'atk', -1);
-
-			battle.choose('p1', 'move recover');
-			battle.choose('p1', 'move synthesis');
-			battle.choose('p2', 'move surf');
-			battle.choose('p2', 'move calmmind');
-
-			assert.strictEqual(battle.turn, 3);
-			assert.fullHP(battle.p1.active[1]);
-
-			battle.choose('p1', 'move recover');
-			battle.choose('p1', 'move 2');
-			battle.choose('p2', 'move 1');
-			battle.choose('p2', 'move calmmind');
-
-			assert.strictEqual(battle.turn, 4);
-			assert.fullHP(battle.p1.active[1]);
 		});
 	});
 
@@ -167,8 +135,8 @@ describe('Decisions', function () {
 					const beforeAtk = activeMons.map(pokemon => pokemon.boosts.atk);
 					battle.p1.chooseMove(i + 1);
 					battle.p2.chooseMove(j + 1);
-					assert.strictEqual(activeMons[0].lastMove, MOVES[0][i]);
-					assert.strictEqual(activeMons[1].lastMove, MOVES[1][j]);
+					assert.strictEqual(activeMons[0].lastMove.id, MOVES[0][i]);
+					assert.strictEqual(activeMons[1].lastMove.id, MOVES[1][j]);
 
 					if (i >= 1) { // p1 used a damaging move
 						assert.atMost(activeMons[1].hp, beforeHP[1] - 1);
@@ -331,11 +299,11 @@ describe('Decisions', function () {
 
 			// Implementation-dependent paths
 			if (battle.turn === 3) {
-				assert.strictEqual(battle.p2.active[0].lastMove, 'struggle');
+				assert.strictEqual(battle.p2.active[0].lastMove.id, 'struggle');
 			} else {
 				battle.choose('p2', 'move 1');
 				assert.strictEqual(battle.turn, 3);
-				assert.strictEqual(battle.p2.active[0].lastMove, 'struggle');
+				assert.strictEqual(battle.p2.active[0].lastMove.id, 'struggle');
 			}
 		});
 
@@ -348,7 +316,7 @@ describe('Decisions', function () {
 			battle.p2.chooseMove(2);
 
 			assert.strictEqual(battle.turn, 2);
-			assert.notStrictEqual(battle.p2.active[0].lastMove, 'struggle');
+			assert.notStrictEqual(battle.p2.active[0].lastMove.id, 'struggle');
 		});
 
 		it('should not force Struggle usage on move attempt when choosing a disabled move', function () {
@@ -360,11 +328,11 @@ describe('Decisions', function () {
 
 			battle.p1.chooseMove(1);
 			assert.strictEqual(battle.turn, 1);
-			assert.notStrictEqual(failingAttacker.lastMove, 'struggle');
+			assert.notStrictEqual(failingAttacker.lastMove && failingAttacker.lastMove.id, 'struggle');
 
 			battle.p1.chooseMove('recover');
 			assert.strictEqual(battle.turn, 1);
-			assert.notStrictEqual(failingAttacker.lastMove, 'struggle');
+			assert.notStrictEqual(failingAttacker.lastMove && failingAttacker.lastMove.id, 'struggle');
 		});
 
 		it('should send meaningful feedback to players if they try to use a disabled move', function () {
@@ -520,7 +488,7 @@ describe('Decisions', function () {
 			]];
 
 			for (let i = 0; i < 10; i++) {
-				const teamOrder = [BASE_TEAM_ORDER, BASE_TEAM_ORDER].map(teamOrder => Tools.shuffle(teamOrder.slice(0, 4)));
+				const teamOrder = [BASE_TEAM_ORDER, BASE_TEAM_ORDER].map(teamOrder => Dex.shuffle(teamOrder.slice(0, 4)));
 				battle = common.createBattle({preview: true}, TEAMS);
 				battle.p1.chooseTeam(teamOrder[0].join(''));
 				battle.p2.chooseTeam(teamOrder[1].join(''));
@@ -531,11 +499,11 @@ describe('Decisions', function () {
 			}
 		});
 
-		it('should autocomplete a single-slot decision in Singles for no Illusion', function () {
+		it('should autocomplete a single-slot action in Singles for no Illusion', function () {
 			// Backwards-compatibility with the client. It should be useful for 3rd party bots/clients (Android?)
 			for (let i = 0; i < 5; i++) {
 				battle = common.createBattle({preview: true}, SINGLES_TEAMS.full);
-				const teamOrder = Tools.shuffle(BASE_TEAM_ORDER.slice()).slice(0, 1);
+				const teamOrder = Dex.shuffle(BASE_TEAM_ORDER.slice()).slice(0, 1);
 				const fullTeamOrder = teamOrder.concat(BASE_TEAM_ORDER.filter(elem => !teamOrder.includes(elem)));
 
 				battle.choose('p1', 'team ' + teamOrder.join(''));
@@ -550,9 +518,9 @@ describe('Decisions', function () {
 		it('should allow specifying the team order in a slot-per-slot basis in Singles with Illusion', function () {
 			for (let i = 0; i < 5; i++) {
 				battle = common.createBattle({preview: true}, SINGLES_TEAMS.illusion);
-				const teamOrder = Tools.shuffle(BASE_TEAM_ORDER.slice());
+				const teamOrder = Dex.shuffle(BASE_TEAM_ORDER.slice());
 
-				teamOrder.forEach(slot => battle.choose('p1', 'team ' + slot));
+				battle.choose('p1', 'team ' + teamOrder.join(''));
 				battle.p2.chooseDefault();
 
 				teamOrder.forEach((oSlot, index) => assert.species(battle.p1.pokemon[index], SINGLES_TEAMS.illusion[0][oSlot - 1].species));
@@ -564,9 +532,9 @@ describe('Decisions', function () {
 		it('should allow specifying the team order in a slot-per-slot basis in Doubles', function () {
 			for (let i = 0; i < 5; i++) {
 				battle = common.createBattle({preview: true, gameType: 'doubles'}, DOUBLES_TEAMS.full);
-				const teamOrder = Tools.shuffle(BASE_TEAM_ORDER.slice());
+				const teamOrder = Dex.shuffle(BASE_TEAM_ORDER.slice());
 
-				teamOrder.forEach(slot => battle.choose('p1', 'team ' + slot));
+				battle.choose('p1', 'team ' + teamOrder.join(''));
 				battle.p2.chooseDefault();
 
 				teamOrder.forEach((oSlot, index) => assert.species(battle.p1.pokemon[index], DOUBLES_TEAMS.full[0][oSlot - 1].species));
@@ -578,9 +546,9 @@ describe('Decisions', function () {
 		it('should allow specifying the team order in a slot-per-slot basis in Triples', function () {
 			for (let i = 0; i < 5; i++) {
 				battle = common.createBattle({preview: true, gameType: 'triples'}, TRIPLES_TEAMS.full);
-				const teamOrder = Tools.shuffle(BASE_TEAM_ORDER.slice());
+				const teamOrder = Dex.shuffle(BASE_TEAM_ORDER.slice());
 
-				teamOrder.forEach(slot => battle.choose('p1', 'team ' + slot));
+				battle.choose('p1', 'team ' + teamOrder.join(''));
 				battle.p2.chooseDefault();
 
 				teamOrder.forEach((oSlot, index) => assert.species(battle.p1.pokemon[index], TRIPLES_TEAMS.full[0][oSlot - 1].species));
@@ -592,7 +560,7 @@ describe('Decisions', function () {
 		it('should autocomplete multi-slot decisions', function () {
 			for (let i = 0; i < 5; i++) {
 				battle = common.createBattle({preview: true}, SINGLES_TEAMS.full);
-				const teamOrder = Tools.shuffle(BASE_TEAM_ORDER.slice()).slice(0, 2);
+				const teamOrder = Dex.shuffle(BASE_TEAM_ORDER.slice()).slice(0, 2);
 				const fullTeamOrder = teamOrder.concat(BASE_TEAM_ORDER.filter(elem => !teamOrder.includes(elem)));
 
 				battle.choose('p1', 'team ' + teamOrder.slice(0, 2).join(''));
@@ -768,11 +736,11 @@ describe('Decisions', function () {
 	});
 });
 
-describe('Decision extensions', function () {
+describe('Choice extensions', function () {
 	describe('Undo', function () {
 		const MODES = ['revoke', 'override'];
 		for (const mode of MODES) {
-			it(`should disallow to ${mode} decisions after every player has sent an unrevoked decision`, function () {
+			it(`should disallow to ${mode} decisions after every player has sent an unrevoked action`, function () {
 				battle = common.createBattle({cancel: true});
 				battle.join('p1', 'Guest 1', 1, [{species: "Bulbasaur", ability: 'overgrow', moves: ['tackle', 'growl']}]);
 				battle.join('p2', 'Guest 2', 1, [{species: "Charmander", ability: 'blaze', moves: ['tackle', 'growl']}]);
@@ -783,8 +751,8 @@ describe('Decision extensions', function () {
 				battle.choose('p1', 'move growl');
 
 				assert.strictEqual(battle.turn, 2);
-				assert.strictEqual(battle.p1.active[0].lastMove, 'tackle');
-				assert.strictEqual(battle.p2.active[0].lastMove, 'growl');
+				assert.strictEqual(battle.p1.active[0].lastMove.id, 'tackle');
+				assert.strictEqual(battle.p2.active[0].lastMove.id, 'growl');
 			});
 
 			it(`should support to ${mode} move decisions`, function () {
@@ -798,7 +766,7 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move growl');
 
 				assert.strictEqual(battle.turn, 2);
-				assert.strictEqual(battle.p1.active[0].lastMove, 'growl');
+				assert.strictEqual(battle.p1.active[0].lastMove.id, 'growl');
 			});
 
 			it(`should disallow to ${mode} move decisions for maybe-disabled Pokémon`, function () {
@@ -815,7 +783,7 @@ describe('Decision extensions', function () {
 				battle.choose('p1', 'move growl');
 				battle.choose('p2', 'move scratch');
 
-				assert.strictEqual(target.lastMove, 'tackle');
+				assert.strictEqual(target.lastMove.id, 'tackle');
 			});
 
 			it(`should disallow to ${mode} move decisions by default`, function () {
@@ -829,8 +797,8 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move growl');
 
 				assert.strictEqual(battle.turn, 2);
-				assert.strictEqual(battle.p1.active[0].lastMove, 'tackle');
-				assert.strictEqual(battle.p2.active[0].lastMove, 'growl');
+				assert.strictEqual(battle.p1.active[0].lastMove.id, 'tackle');
+				assert.strictEqual(battle.p2.active[0].lastMove.id, 'growl');
 			});
 
 			it(`should support to ${mode} switch decisions on move requests`, function () {
@@ -849,7 +817,7 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move 1');
 
 				['Bulbasaur', 'Ivysaur', 'Venusaur'].forEach((species, index) => assert.species(battle.p1.pokemon[index], species));
-				assert.strictEqual(battle.p1.active[0].lastMove, 'synthesis');
+				assert.strictEqual(battle.p1.active[0].lastMove.id, 'synthesis');
 
 				battle.destroy();
 				battle = common.createBattle({cancel: true}, TEAMS);
@@ -963,7 +931,7 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move 1, move 1, move 1');
 
 				['Bulbasaur', 'Ivysaur', 'Venusaur'].forEach((species, index) => assert.species(battle.p1.active[index], species));
-				assert.strictEqual(battle.p1.active[0].lastMove, 'synthesis');
+				assert.strictEqual(battle.p1.active[0].lastMove.id, 'synthesis');
 
 				battle.destroy();
 				battle = common.createBattle({gameType: 'triples', cancel: true}, TEAMS);
@@ -974,7 +942,7 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move 1, move 1, move 1');
 
 				['Bulbasaur', 'Ivysaur', 'Venusaur'].forEach((species, index) => assert.species(battle.p1.active[index], species));
-				assert.strictEqual(battle.p1.active[2].lastMove, 'synthesis');
+				assert.strictEqual(battle.p1.active[2].lastMove.id, 'synthesis');
 			});
 
 			it(`should disallow to ${mode} shift decisions by default`, function () {
@@ -995,7 +963,7 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move 1, move 1, move 1');
 
 				['Ivysaur', 'Bulbasaur', 'Venusaur'].forEach((species, index) => assert.species(battle.p1.active[index], species));
-				assert.strictEqual(battle.p1.active[0].lastMove, 'growth');
+				assert.strictEqual(battle.p1.active[0].lastMove.id, 'growth');
 
 				battle.destroy();
 				battle = common.createBattle({gameType: 'triples'}, TEAMS);
@@ -1006,7 +974,7 @@ describe('Decision extensions', function () {
 				battle.choose('p2', 'move 1, move 1, move 1');
 
 				['Bulbasaur', 'Venusaur', 'Ivysaur'].forEach((species, index) => assert.species(battle.p1.active[index], species));
-				assert.strictEqual(battle.p1.active[2].lastMove, 'growth');
+				assert.strictEqual(battle.p1.active[2].lastMove.id, 'growth');
 			});
 
 			it(`should support to ${mode} switch decisions on double switch requests`, function () {
@@ -1145,7 +1113,7 @@ describe('Decision extensions', function () {
 				['Deoxys-Attack', 'Chikorita'].forEach((species, index) => assert.species(battle.p1.active[index], species));
 			});
 
-			it(`should support to ${mode} team order decision on team preview requests`, function () {
+			it(`should support to ${mode} team order action on team preview requests`, function () {
 				battle = common.createBattle({preview: true, cancel: true}, [
 					[{species: 'Bulbasaur', ability: 'overgrow', moves: ['tackle']}, {species: 'Ivysaur', ability: 'overgrow', moves: ['tackle']}],
 					[{species: 'Charmander', ability: 'blaze', moves: ['scratch']}, {species: 'Charmeleon', ability: 'blaze', moves: ['scratch']}],
@@ -1172,7 +1140,7 @@ describe('Decision extensions', function () {
 				['Bulbasaur', 'Ivysaur'].forEach((species, index) => assert.species(battle.p1.pokemon[index], species));
 			});
 
-			it(`should disallow to ${mode} team order decision on team preview requests by default`, function () {
+			it(`should disallow to ${mode} team order action on team preview requests by default`, function () {
 				battle = common.createBattle({preview: true}, [
 					[{species: 'Bulbasaur', ability: 'overgrow', moves: ['tackle']}, {species: 'Ivysaur', ability: 'overgrow', moves: ['tackle']}],
 					[{species: 'Charmander', ability: 'blaze', moves: ['scratch']}, {species: 'Charmeleon', ability: 'blaze', moves: ['scratch']}],
@@ -1187,137 +1155,9 @@ describe('Decision extensions', function () {
 			});
 		}
 	});
-
-	describe('Undo > Partial Decisions', function () {
-		const DOUBLES = {gameType: 'doubles', cancel: true, partialDecisions: true};
-		const TRIPLES = {gameType: 'triples', cancel: true, partialDecisions: true};
-
-		it(`should support to revoke move decisions on move requests`, function () {
-			let didFullUndo = false;
-			for (const finalIndex of [0, 0, 1, 2]) {
-				battle = common.createBattle(TRIPLES, TRIPLES_TEAMS.default);
-
-				for (let i = 0; i <= finalIndex; i++) {
-					battle.choose('p1', 'move 1');
-				}
-				battle.undoChoice('p1', didFullUndo ? 1 : true);
-				didFullUndo = true;
-				battle.choose('p1', 'switch 4');
-				for (let i = finalIndex + 1; i < 3; i++) {
-					battle.choose('p1', 'move 1');
-				}
-
-				battle.p2.chooseDefault();
-				assert.species(battle.p1.active[finalIndex], TRIPLES_TEAMS.default[0][3].species);
-
-				if (finalIndex !== 2) battle.destroy();
-			}
-		});
-
-		it(`should support to revoke switch decisions on move requests`, function () {
-			let didFullUndo = false;
-			for (const finalIndex of [0, 0, 1, 2]) {
-				battle = common.createBattle(TRIPLES, TRIPLES_TEAMS.default);
-
-				for (let i = 0; i < finalIndex; i++) {
-					battle.choose('p1', 'move 1');
-				}
-				battle.choose('p1', 'switch 4');
-				battle.undoChoice('p1', didFullUndo ? 1 : void 0);
-				didFullUndo = true;
-				battle.choose('p1', 'move 1');
-				for (let i = finalIndex + 1; i < 3; i++) {
-					battle.choose('p1', 'move 1');
-				}
-				battle.p2.chooseDefault();
-				assert.strictEqual(battle.p1.active[finalIndex].lastMove, TRIPLES_TEAMS.default[0][finalIndex].moves[0]);
-
-				if (finalIndex !== 2) battle.destroy();
-			}
-		});
-
-		it(`should support to revoke shift decisions on move requests`, function () {
-			battle = common.createBattle(TRIPLES, TRIPLES_TEAMS.default);
-
-			battle.choose('p1', 'shift');
-			battle.undoChoice('p1');
-			for (let i = 0; i < 3; i++) battle.choose('p1', 'move 1');
-			battle.p2.chooseDefault();
-
-			TRIPLES_TEAMS.default[0].slice(0, 3).map(set => set.species).forEach((species, index) => assert.species(battle.p1.active[index], species));
-			battle.destroy();
-
-			battle = common.createBattle(TRIPLES, TRIPLES_TEAMS.default);
-
-			battle.choose('p1', 'shift');
-			battle.undoChoice('p1', 1);
-			for (let i = 0; i < 3; i++) battle.choose('p1', 'move 1');
-			battle.p2.chooseDefault();
-
-			TRIPLES_TEAMS.default[0].slice(0, 3).map(set => set.species).forEach((species, index) => assert.species(battle.p1.active[index], species));
-			battle.destroy();
-
-			battle = common.createBattle(TRIPLES, TRIPLES_TEAMS.default);
-
-			for (let i = 0; i < 2; i++) battle.choose('p1', 'move 1');
-			battle.choose('p1', 'shift');
-			battle.undoChoice('p1', 1);
-			battle.p2.chooseDefault();
-
-			TRIPLES_TEAMS.default[0].slice(0, 3).map(set => set.species).forEach((species, index) => assert.species(battle.p1.active[index], species));
-		});
-
-		it(`should support to revoke switch decisions on switch requests`, function () {
-			battle = common.createBattle(DOUBLES, DOUBLES_TEAMS.default);
-			battle.commitDecisions();
-
-			battle.choose('p1', 'switch 3');
-			battle.undoChoice('p1');
-			battle.choose('p1', 'switch 4, switch 3');
-
-			[DOUBLES_TEAMS.default[0][3], DOUBLES_TEAMS.default[0][2]].map(set => set.species).forEach((species, index) => assert.species(battle.p1.active[index], species));
-		});
-
-		it(`should support to revoke pass decisions on switch requests`, function () {
-			battle = common.createBattle(DOUBLES, DOUBLES_TEAMS.forcePass);
-			battle.commitDecisions();
-
-			battle.choose('p1', 'pass');
-			battle.undoChoice('p1');
-			battle.choose('p1', 'switch 3, pass');
-
-			[DOUBLES_TEAMS.forcePass[0][2], DOUBLES_TEAMS.forcePass[0][1]].map(set => set.species).forEach((species, index) => assert.species(battle.p1.active[index], species));
-		});
-
-		it(`should support to revoke team order decisions on team preview requests`, function () {
-			const TEAM_ORDER = [1, 2, 3, 4, 5, 6];
-			for (let i = 0; i < 20; i++) {
-				battle = common.createBattle(Object.assign({preview: true}, DOUBLES), DOUBLES_TEAMS.full);
-				const wrongOrder = TEAM_ORDER.slice(0, 1).concat(Tools.shuffle(TEAM_ORDER.slice(1)));
-				const rightOrder = TEAM_ORDER.slice(0, 1).concat(Tools.shuffle(TEAM_ORDER.slice(1)));
-				const divergeIndex = wrongOrder.findIndex((elem, index) => rightOrder[index] !== elem);
-				if (divergeIndex < 0) continue;
-				const finalIndex = divergeIndex + Math.floor(Math.random() * (5 - divergeIndex));
-				const undoSteps = finalIndex - divergeIndex + 1;
-
-				for (let j = 0; j <= finalIndex; j++) {
-					battle.choose('p1', 'team ' + wrongOrder[j]);
-				}
-				battle.undoChoice('p1', undoSteps);
-				for (let j = divergeIndex; j < 6; j++) {
-					battle.choose('p1', 'team ' + rightOrder[j]);
-				}
-				assert(battle.p1.getDecisionsFinished(), `Decisions for ${battle.p1} not finished`);
-				battle.p2.chooseDefault();
-				rightOrder.map(slot => DOUBLES_TEAMS.full[0][slot - 1].species).forEach((species, index) => assert.species(battle.p1.pokemon[index], species));
-
-				if (i < 19) battle.destroy();
-			}
-		});
-	});
 });
 
-describe('Decision internals', function () {
+describe('Choice internals', function () {
 	afterEach(function () {
 		battle.destroy();
 	});
@@ -1408,7 +1248,7 @@ describe('Decision internals', function () {
 		assert.strictEqual(p1.active[1].name, 'Ekans');
 	});
 
-	it('should empty the decisions list when undoing a move', function () {
+	it('should empty the actions list when undoing a move', function () {
 		battle = common.createBattle({gameType: 'doubles', cancel: true});
 		const p1 = battle.join('p1', 'Guest 1', 1, [
 			{species: "Pineco", ability: 'sturdy', moves: ['selfdestruct']},
@@ -1421,9 +1261,9 @@ describe('Decision internals', function () {
 		]);
 
 		p1.chooseMove(1);
-		assert(p1.choiceData.decisions.length > 0);
+		assert(p1.choice.actions.length > 0);
 		battle.undoChoice('p1');
-		assert.false(p1.choiceData.decisions.length > 0);
+		assert.false(p1.choice.actions.length > 0);
 		p1.chooseDefault();
 		p2.chooseDefault();
 
@@ -1431,7 +1271,7 @@ describe('Decision internals', function () {
 		assert.fainted(p1.active[1]);
 	});
 
-	it('should empty the decisions list when undoing a switch', function () {
+	it('should empty the actions list when undoing a switch', function () {
 		battle = common.createBattle({gameType: 'doubles', cancel: true});
 		const p1 = battle.join('p1', 'Guest 1', 1, [
 			{species: "Pineco", ability: 'sturdy', moves: ['selfdestruct']},
@@ -1446,16 +1286,16 @@ describe('Decision internals', function () {
 		battle.commitDecisions();
 
 		p1.chooseSwitch(3);
-		assert(p1.choiceData.decisions.length > 0);
+		assert(p1.choice.actions.length > 0);
 		battle.undoChoice('p1');
-		assert.false(p1.choiceData.decisions.length > 0);
+		assert.false(p1.choice.actions.length > 0);
 		p1.choosePass().chooseSwitch(3);
 
 		assert.fainted(p1.active[0]);
 		assert.species(p1.active[1], 'Koffing');
 	});
 
-	it('should empty the decisions list when undoing a pass', function () {
+	it('should empty the actions list when undoing a pass', function () {
 		battle = common.createBattle({gameType: 'doubles', cancel: true});
 		const p1 = battle.join('p1', 'Guest 1', 1, [
 			{species: "Pineco", ability: 'sturdy', moves: ['selfdestruct']},
@@ -1470,16 +1310,16 @@ describe('Decision internals', function () {
 		battle.commitDecisions();
 
 		p1.choosePass();
-		assert(p1.choiceData.decisions.length > 0);
+		assert(p1.choice.actions.length > 0);
 		battle.undoChoice('p1');
-		assert.false(p1.choiceData.decisions.length > 0);
+		assert.false(p1.choice.actions.length > 0);
 		p1.choosePass().chooseSwitch(3);
 
 		assert.fainted(p1.active[0]);
 		assert.species(p1.active[1], 'Koffing');
 	});
 
-	it('should empty the decisions list when undoing a shift', function () {
+	it('should empty the actions list when undoing a shift', function () {
 		battle = common.createBattle({gameType: 'triples', cancel: true});
 		battle.supportCancel = true;
 		const p1 = battle.join('p1', 'Guest 1', 1, [
@@ -1494,9 +1334,9 @@ describe('Decision internals', function () {
 		]);
 
 		p1.chooseShift();
-		assert(p1.choiceData.decisions.length > 0);
+		assert(p1.choice.actions.length > 0);
 		battle.undoChoice('p1');
-		assert.false(p1.choiceData.decisions.length > 0);
+		assert.false(p1.choice.actions.length > 0);
 		p1.chooseMove(1).chooseMove(1).chooseShift();
 		p2.chooseDefault();
 

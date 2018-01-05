@@ -154,7 +154,7 @@ class MafiaPlayer extends Rooms.RoomGamePlayer {
 					return;
 				}
 			}
-			this.game.progress();
+			this.game.progress(true);
 		} else {
 			this.sendRoom("Invalid target");
 		}
@@ -175,7 +175,7 @@ class MafiaPlayer extends Rooms.RoomGamePlayer {
 					return;
 				}
 			}
-			this.game.progress();
+			this.game.progress(true);
 		} else {
 			this.sendRoom("You can't vote for that person");
 		}
@@ -223,11 +223,11 @@ class Mafia extends Rooms.RoomGame {
 	exportGame() {
 		let gameObj = {classes: {}, settings: {}};
 
-		for (let i = 0; i < this.roles.length; i++) {
-			if (this.roles[i] in gameObj.classes) {
-				gameObj.classes[this.roles[i]]++;
+		for (const role of this.roles) {
+			if (role in gameObj.classes) {
+				gameObj.classes[role]++;
 			} else {
-				gameObj.classes[this.roles[i]] = 1;
+				gameObj.classes[role] = 1;
 			}
 		}
 
@@ -335,8 +335,8 @@ class Mafia extends Rooms.RoomGame {
 	pregameWindow(joined) {
 		let temp = Object.values(this.players);
 		let output = '<div class="broadcast-blue"><center><h2>A game of mafia has been made!</h2><p>Participants (' + (this.playerCap - temp.length) + ' needed): </p>';
-		for (let i = 0; i < temp.length; i++) {
-			output += Chat.escapeHTML(temp[i].name);
+		for (const [i, player] of temp.entries()) {
+			output += Chat.escapeHTML(player.name);
 			if (i < temp.length - 1) {
 				output += ', ';
 			}
@@ -427,12 +427,12 @@ class Mafia extends Rooms.RoomGame {
 		let votes = this.parseVotes();
 
 		for (let i in votes) {
-			if (votes[i].num > (Object.keys(this.players).length / 2)) return this.progress();
+			if (votes[i].num > (Object.keys(this.players).length / 2)) return this.progress(true);
 			text += '<b>' + (i === 'none' ? 'Abstain' : Chat.escapeHTML(this.players[i].name)) + '</b>: ';
 			if (this.anonVotes) {
-				text += this.currentVote[i].num + ' votes.';
+				text += votes[i].num + ' votes.';
 			} else {
-				text += this.currentVote[i].voters.join(', ');
+				text += votes[i].voters.join(', ');
 			}
 			text += '<br />';
 		}
@@ -510,16 +510,17 @@ class Mafia extends Rooms.RoomGame {
 		this.destroy();
 	}
 
-	progress() {
-		for (let i in this.players) {
-			if (!this.players[i].done) {
-				this.players[i].eliminate();
+	progress(early) {
+		if (!early) {
+			for (let i in this.players) {
+				if (!this.players[i].done) {
+					this.players[i].eliminate();
+				}
 			}
 		}
 
 		if (this.executionOrder) {
-			for (let i = 0; i < this.executionOrder.length; i++) {
-				let player = this.executionOrder[i];
+			for (const player of this.executionOrder) {
 				if (!player) continue;
 				if (player.toExecute) {
 					if (player.roleBlocked) {
@@ -667,29 +668,28 @@ class Mafia extends Rooms.RoomGame {
 			}
 		}
 
-		for (let i = 0; i < voters.length; i++) {
-			voters[i].validVotes = noMafia;
+		for (let voter of voters) {
+			voter.validVotes = noMafia;
+			const otherVoters = voters.filter(otherVoter => otherVoter !== voter);
 
 			let flavorText = '';
 			if (voters.length === 1) {
 				flavorText += 'As the only live member of the mafia, you have to be careful. Not careful enough to stop killing, though.';
 			} else if (voters.length === 2) {
-				flavorText += 'You sit down with the only other member of the mafia, ' + (i === 0 ? Chat.escapeHTML(voters[1].name) : Chat.escapeHTML(voters[0].name)) + '.';
+				flavorText += 'You sit down with the only other member of the mafia, ' + Chat.escapeHTML(otherVoters[0].name) + '.';
 			} else {
-				flavorText += 'You sit down with the other members of the mafia, ';
-				for (let j = 0; i < voters.length; i++) {
-					if (i !== j) {
-						if (j === (voters.length - 1) || (j < i && j === (voters.length - 2))) {
-							flavorText += ' and ';
-						} else {
-							flavorText += ', ';
-						}
-						flavorText += Chat.escapeHTML(voters[i].name);
+				flavorText += 'You sit down with the other members of the mafia';
+				for (const [i, otherVoter] of otherVoters.entries()) {
+					if (i === otherVoters.length - 1) {
+						flavorText += ' and ';
+					} else {
+						flavorText += ', ';
 					}
+					flavorText += Chat.escapeHTML(otherVoter.name);
 				}
 			}
 
-			voters[i].voteWindow(voters[i].class.image, flavorText);
+			voter.voteWindow(voter.class.image, flavorText);
 		}
 	}
 
@@ -752,7 +752,7 @@ exports.commands = {
 						return this.errorReply(Chat.escapeHTML(i) + " is not a valid mafia class.");
 					}
 
-					let amt = parseInt(Tools.getString(targetObj.classes[i]));
+					let amt = parseInt(Dex.getString(targetObj.classes[i]));
 					if (isNaN(amt) || amt < 0 || amt > 25) return this.errorReply("Invalid amount for class " + Chat.escapeHTML(i));
 
 					for (let j = 0; j < amt; j++) {
@@ -782,9 +782,9 @@ exports.commands = {
 
 				if (!params) return this.errorReply("No roles entered.");
 
-				for (let i = 0; i < params.length; i++) {
-					if (!MafiaData.MafiaClasses[params[i]]) {
-						return this.errorReply(Chat.escapeHTML(params[i]) + " is not a valid mafia class.");
+				for (const param of params) {
+					if (!MafiaData.MafiaClasses[param]) {
+						return this.errorReply(Chat.escapeHTML(param) + " is not a valid mafia class.");
 					}
 				}
 

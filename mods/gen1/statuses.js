@@ -61,8 +61,8 @@ exports.BattleStatuses = {
 		effectType: 'Status',
 		onStart: function (target) {
 			this.add('-status', target, 'slp');
-			// 1-7 turns. Put 1-7 since they awake at end of turn.
-			this.effectData.startTime = this.random(1, 7);
+			// 1-7 turns
+			this.effectData.startTime = this.random(1, 8);
 			this.effectData.time = this.effectData.startTime;
 		},
 		onBeforeMovePriority: 10,
@@ -71,7 +71,7 @@ exports.BattleStatuses = {
 			if (pokemon.statusData.time > 0) {
 				this.add('cant', pokemon, 'slp');
 			}
-			pokemon.lastMove = '';
+			pokemon.lastMove = null;
 			return false;
 		},
 		onAfterMoveSelf: function (pokemon) {
@@ -86,7 +86,7 @@ exports.BattleStatuses = {
 		onBeforeMovePriority: 10,
 		onBeforeMove: function (pokemon, target, move) {
 			this.add('cant', pokemon, 'frz');
-			pokemon.lastMove = '';
+			pokemon.lastMove = null;
 			return false;
 		},
 		onHit: function (target, source, move) {
@@ -214,7 +214,7 @@ exports.BattleStatuses = {
 			return duration;
 		},
 		onResidual: function (target) {
-			if (target.lastMove === 'struggle' || target.status === 'slp') {
+			if (target.lastMove && target.lastMove.id === 'struggle' || target.status === 'slp') {
 				delete target.volatiles['partialtrappinglock'];
 			}
 		},
@@ -225,10 +225,9 @@ exports.BattleStatuses = {
 			if (!pokemon.hasMove(this.effectData.move)) {
 				return;
 			}
-			let moves = pokemon.moveset;
-			for (let i = 0; i < moves.length; i++) {
-				if (moves[i].id !== this.effectData.move) {
-					pokemon.disableMove(moves[i].id);
+			for (const moveSlot of pokemon.moveSlots) {
+				if (moveSlot.id !== this.effectData.move) {
+					pokemon.disableMove(moveSlot.id);
 				}
 			}
 		},

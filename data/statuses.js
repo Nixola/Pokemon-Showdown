@@ -12,7 +12,7 @@ exports.BattleStatuses = {
 				this.add('-status', target, 'brn');
 			}
 		},
-		// Damage reduction is handled directly in the battle-engine.js damage function
+		// Damage reduction is handled directly in the sim/battle.js damage function
 		onResidualOrder: 9,
 		onResidual: function (pokemon) {
 			this.damage(pokemon.maxhp / 16);
@@ -81,7 +81,7 @@ exports.BattleStatuses = {
 				let template = this.getTemplate('Shaymin');
 				target.formeChange(template);
 				target.baseTemplate = template;
-				target.setAbility(template.abilities['0']);
+				target.setAbility(template.abilities['0'], null, true);
 				target.baseAbility = target.ability;
 				target.details = template.species + (target.level === 100 ? '' : ', L' + target.level) + (target.gender === '' ? '' : ', ' + target.gender) + (target.set.shiny ? ', shiny' : '');
 				this.add('detailschange', target, target.details);
@@ -171,6 +171,7 @@ exports.BattleStatuses = {
 			if (this.random(3) > 0) {
 				return;
 			}
+			this.activeTarget = pokemon;
 			this.damage(this.getDamage(pokemon, pokemon, 40), pokemon, pokemon, {
 				id: 'confused',
 				effectType: 'Move',
@@ -282,10 +283,14 @@ exports.BattleStatuses = {
 	},
 	choicelock: {
 		onStart: function (pokemon) {
-			if (!this.activeMove.id || this.activeMove.sourceEffect && this.activeMove.sourceEffect !== this.activeMove.id) return false;
+			if (!this.activeMove.id || this.activeMove.hasBounced) return false;
 			this.effectData.move = this.activeMove.id;
 		},
 		onBeforeMove: function (pokemon, target, move) {
+			if (!pokemon.getItem().isChoice || !pokemon.hasMove(this.effectData.move)) {
+				pokemon.removeVolatile('choicelock');
+				return;
+			}
 			if (move.id !== this.effectData.move && move.id !== 'struggle') {
 				// Fails even if the Choice item is being ignored, and no PP is lost
 				this.addMove('move', pokemon, move.name);
@@ -302,10 +307,9 @@ exports.BattleStatuses = {
 			if (pokemon.ignoringItem()) {
 				return;
 			}
-			let moves = pokemon.moveset;
-			for (let i = 0; i < moves.length; i++) {
-				if (moves[i].id !== this.effectData.move) {
-					pokemon.disableMove(moves[i].id, false, this.effectData.sourceEffect);
+			for (const moveSlot of pokemon.moveSlots) {
+				if (moveSlot.id !== this.effectData.move) {
+					pokemon.disableMove(moveSlot.id, false, this.effectData.sourceEffect);
 				}
 			}
 		},
@@ -316,7 +320,7 @@ exports.BattleStatuses = {
 		onBeforeMove: function (pokemon) {
 			this.add('cant', pokemon, 'recharge');
 			pokemon.removeVolatile('mustrecharge');
-			return false;
+			return null;
 		},
 		onLockMove: function (pokemon) {
 			this.add('-mustrecharge', pokemon);
@@ -347,7 +351,7 @@ exports.BattleStatuses = {
 
 				// time's up; time to hit! :D
 				let target = side.active[i];
-				let move = this.getMove(posData.move);
+				const move = this.getMove(posData.move);
 				if (target.fainted) {
 					this.add('-hint', '' + move.name + ' did not hit because the target is fainted.');
 					this.effectData.positions[i] = null;
@@ -361,8 +365,9 @@ exports.BattleStatuses = {
 				if (posData.source.hasAbility('infiltrator') && this.gen >= 6) {
 					posData.moveData.infiltrates = true;
 				}
+				const hitMove = new this.Data.Move(posData.moveData);
 
-				this.tryMoveHit(target, posData.source, posData.moveData);
+				this.tryMoveHit(target, posData.source, hitMove);
 
 				this.effectData.positions[i] = null;
 			}
@@ -414,19 +419,6 @@ exports.BattleStatuses = {
 		onBasePower: function (basePower, user, target, move) {
 			this.debug('Gem Boost');
 			return this.chainModify([0x14CD, 0x1000]);
-		},
-	},
-	aura: {
-		duration: 1,
-		onBasePowerPriority: 8,
-		onBasePower: function (basePower, user, target, move) {
-			let modifier = 0x1547;
-			this.debug('Aura Boost');
-			if (user.volatiles['aurabreak']) {
-				modifier = 0x0C00;
-				this.debug('Aura Boost reverted by Aura Break');
-			}
-			return this.chainModify([modifier, 0x1000]);
 		},
 	},
 

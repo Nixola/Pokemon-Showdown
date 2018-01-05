@@ -6,10 +6,10 @@
 
 'use strict';
 
-const http = require('http');
+const https = require('https');
 
 function apiRequest(url, onEnd, onError) {
-	http.get(url, res => {
+	https.get(url, res => {
 		let buffer = '';
 		res.setEncoding('utf8');
 		res.on('data', data => {
@@ -25,7 +25,7 @@ function apiRequest(url, onEnd, onError) {
 
 function mediawikiSearch(domain, query) {
 	return new Promise(function (resolve, reject) {
-		apiRequest(`http://${domain}/w/api.php?action=query&list=search&format=json&srsearch=${encodeURIComponent(query)}&srwhat=nearmatch`, res => {
+		apiRequest(`https://${domain}/w/api.php?action=query&list=search&format=json&srsearch=${encodeURIComponent(query)}&srwhat=nearmatch`, res => {
 			let result;
 			try {
 				result = JSON.parse(res);
@@ -44,7 +44,7 @@ function mediawikiSearch(domain, query) {
 
 function wikiaSearch(subdomain, query) {
 	return new Promise(function (resolve, reject) {
-		apiRequest(`http://${subdomain}.wikia.com/api/v1/Search/List/?query=${encodeURIComponent(query)}&limit=1`, res => {
+		apiRequest(`https://${subdomain}.wikia.com/api/v1/Search/List/?query=${encodeURIComponent(query)}&limit=1`, res => {
 			let result;
 			try {
 				result = JSON.parse(res);
@@ -52,7 +52,7 @@ function wikiaSearch(subdomain, query) {
 				return reject(e);
 			}
 			if (!result) return reject(new Error("Malformed data"));
-			if (result.exception) return reject(new Error(Tools.getString(result.exception.message) || "Not found"));
+			if (result.exception) return reject(new Error(Dex.getString(result.exception.message) || "Not found"));
 			if (!Array.isArray(result.items) || !result.items[0] || typeof result.items[0] !== 'object') return reject(new Error("Malformed data"));
 
 			return resolve(result.items[0]);
@@ -61,7 +61,7 @@ function wikiaSearch(subdomain, query) {
 }
 function getCardDetails(subdomain, id) {
 	return new Promise(function (resolve, reject) {
-		apiRequest(`http://${subdomain}.wikia.com/api/v1/Articles/Details?ids=${encodeURIComponent(id)}&abstract=0&width=80&height=115`, res => {
+		apiRequest(`https://${subdomain}.wikia.com/api/v1/Articles/Details?ids=${encodeURIComponent(id)}&abstract=0&width=80&height=115`, res => {
 			let result;
 			try {
 				result = JSON.parse(res);
@@ -69,7 +69,7 @@ function getCardDetails(subdomain, id) {
 				return reject(e);
 			}
 			if (!result) return reject(new Error("Malformed data"));
-			if (result.exception) return reject(new Error(Tools.getString(result.exception.message) || "Not found"));
+			if (result.exception) return reject(new Error(Dex.getString(result.exception.message) || "Not found"));
 			if (typeof result.items !== 'object' || !result.items[id] || typeof result.items[id] !== 'object') return reject(new Error("Malformed data"));
 
 			return resolve(result.items[id]);
@@ -87,13 +87,13 @@ exports.commands = {
 
 		wikiaSearch(subdomain, query).then(data => {
 			if (!this.runBroadcast()) return;
-			let entryUrl = Tools.getString(data.url);
-			let entryTitle = Tools.getString(data.title);
-			let id = Tools.getString(data.id);
+			let entryUrl = Dex.getString(data.url);
+			let entryTitle = Dex.getString(data.title);
+			let id = Dex.getString(data.id);
 			let htmlReply = `<strong>Best result for ${Chat.escapeHTML(query)}:</strong><br /><a href="${Chat.escapeHTML(entryUrl)}">${Chat.escapeHTML(entryTitle)}</a>`;
 			if (id) {
 				getCardDetails(subdomain, id).then(card => {
-					let thumb = Tools.getString(card.thumbnail);
+					let thumb = Dex.getString(card.thumbnail);
 					if (thumb) {
 						htmlReply = `<table><tr><td style="padding-right:5px;"><img src="${Chat.escapeHTML(thumb)}" width=80 height=115></td><td>${htmlReply}</td></tr></table>`;
 					}
@@ -132,8 +132,8 @@ exports.commands = {
 
 		mediawikiSearch(domain, query).then(data => {
 			if (!this.runBroadcast()) return;
-			let snippet = Tools.getString(data.snippet);
-			let page = Tools.getString(data.title);
+			let snippet = Dex.getString(data.snippet);
+			let page = Dex.getString(data.title);
 			if (snippet.startsWith('#REDIRECT')) {
 				let redir = /\[\[(.+)\]\]/.exec(snippet);
 				if (redir) page = redir[1];

@@ -40,14 +40,14 @@ exports.BattleStatuses = {
 		onStart: function (target) {
 			this.add('-status', target, 'slp');
 			// 1-3 turns
-			this.effectData.startTime = this.random(1, 3);
+			this.effectData.startTime = this.random(1, 4);
 			this.effectData.time = this.effectData.startTime;
 		},
 		onBeforeMovePriority: 2,
 		onBeforeMove: function (pokemon, target, move) {
 			pokemon.statusData.time--;
 			this.add('cant', pokemon, 'slp');
-			pokemon.lastMove = '';
+			pokemon.lastMove = null;
 			return false;
 		},
 		onAfterMoveSelf: function (pokemon) {
@@ -62,7 +62,7 @@ exports.BattleStatuses = {
 		onBeforeMovePriority: 2,
 		onBeforeMove: function (pokemon, target, move) {
 			this.add('cant', pokemon, 'frz');
-			pokemon.lastMove = '';
+			pokemon.lastMove = null;
 			return false;
 		},
 		onHit: function (target, source, move) {

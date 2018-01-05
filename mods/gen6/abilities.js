@@ -5,12 +5,8 @@ exports.BattleAbilities = {
 		inherit: true,
 		desc: "This Pokemon's Normal-type moves become Flying-type moves and have their power multiplied by 1.3. This effect comes after other effects that change a move's type, but before Ion Deluge and Electrify's effects.",
 		shortDesc: "This Pokemon's Normal-type moves become Flying type and have 1.3x power.",
-		effect: {
-			duration: 1,
-			onBasePowerPriority: 8,
-			onBasePower: function (basePower, pokemon, target, move) {
-				return this.chainModify([0x14CD, 0x1000]);
-			},
+		onBasePower: function (basePower, pokemon, target, move) {
+			if (move.aerilateBoosted) return this.chainModify([0x14CD, 0x1000]);
 		},
 	},
 	"aftermath": {
@@ -21,6 +17,11 @@ exports.BattleAbilities = {
 			}
 		},
 	},
+	"damp": {
+		inherit: true,
+		desc: "While this Pokemon is active, Explosion, Self-Destruct, and the Ability Aftermath are prevented from having an effect.",
+		shortDesc: "Prevents Explosion/Self-Destruct/Aftermath while this Pokemon is active.",
+	},
 	"galewings": {
 		inherit: true,
 		shortDesc: "This Pokemon's Flying-type moves have their priority increased by 1.",
@@ -28,6 +29,11 @@ exports.BattleAbilities = {
 			if (move && move.type === 'Flying') return priority + 1;
 		},
 		rating: 4.5,
+	},
+	"infiltrator": {
+		inherit: true,
+		desc: "This Pokemon's moves ignore substitutes and the opposing side's Reflect, Light Screen, Safeguard, and Mist.",
+		shortDesc: "Moves ignore substitutes and the foe's Reflect, Light Screen, Safeguard, and Mist.",
 	},
 	"ironbarbs": {
 		inherit: true,
@@ -68,35 +74,16 @@ exports.BattleAbilities = {
 		inherit: true,
 		desc: "This Pokemon's damaging moves become multi-hit moves that hit twice. The second hit has its damage halved. Does not affect multi-hit moves or moves that have multiple targets.",
 		shortDesc: "This Pokemon's damaging moves hit twice. The second hit has its damage halved.",
-		effect: {
-			duration: 1,
-			onBasePowerPriority: 8,
-			onBasePower: function (basePower) {
-				if (this.effectData.hit) {
-					this.effectData.hit++;
-					return this.chainModify(0.5);
-				} else {
-					this.effectData.hit = 1;
-				}
-			},
-			onSourceModifySecondaries: function (secondaries, target, source, move) {
-				if (move.id === 'secretpower' && this.effectData.hit < 2) {
-					// hack to prevent accidentally suppressing King's Rock/Razor Fang
-					return secondaries.filter(effect => effect.volatileStatus === 'flinch');
-				}
-			},
+		onBasePower: function (basePower, pokemon, target, move) {
+			if (move.hasParentalBond && ++move.hit > 1) return this.chainModify(0.5);
 		},
 	},
 	"pixilate": {
 		inherit: true,
 		desc: "This Pokemon's Normal-type moves become Fairy-type moves and have their power multiplied by 1.3. This effect comes after other effects that change a move's type, but before Ion Deluge and Electrify's effects.",
 		shortDesc: "This Pokemon's Normal-type moves become Fairy type and have 1.3x power.",
-		effect: {
-			duration: 1,
-			onBasePowerPriority: 8,
-			onBasePower: function (basePower, pokemon, target, move) {
-				return this.chainModify([0x14CD, 0x1000]);
-			},
+		onBasePower: function (basePower, pokemon, target, move) {
+			if (move.pixilateBoosted) return this.chainModify([0x14CD, 0x1000]);
 		},
 	},
 	"prankster": {
@@ -108,12 +95,8 @@ exports.BattleAbilities = {
 		inherit: true,
 		desc: "This Pokemon's Normal-type moves become Ice-type moves and have their power multiplied by 1.3. This effect comes after other effects that change a move's type, but before Ion Deluge and Electrify's effects.",
 		shortDesc: "This Pokemon's Normal-type moves become Ice type and have 1.3x power.",
-		effect: {
-			duration: 1,
-			onBasePowerPriority: 8,
-			onBasePower: function (basePower, pokemon, target, move) {
-				return this.chainModify([0x1333, 0x1000]);
-			},
+		onBasePower: function (basePower, pokemon, target, move) {
+			if (move.refrigerateBoosted) return this.chainModify([0x14CD, 0x1000]);
 		},
 	},
 	"roughskin": {
@@ -134,7 +117,7 @@ exports.BattleAbilities = {
 		shortDesc: "If a physical attack hits this Pokemon, Defense is lowered by 1, Speed is raised by 1.",
 		onAfterDamage: function (damage, target, source, move) {
 			if (move.category === 'Physical') {
-				this.boost({def:-1, spe:1});
+				this.boost({def: -1, spe: 1});
 			}
 		},
 		rating: 0.5,

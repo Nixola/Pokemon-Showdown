@@ -7,9 +7,9 @@ let battle;
 
 let moves = ['Ice Ball', 'Rollout'];
 
-for (let i = 0; i < moves.length; i++) {
-	describe(moves[i], function () {
-		let id = moves[i].toLowerCase().replace(/\W+/g, '');
+for (const move of moves) {
+	describe(move, function () {
+		let id = move.toLowerCase().replace(/\W+/g, '');
 
 		afterEach(function () {
 			battle.destroy();
@@ -23,7 +23,7 @@ for (let i = 0; i < moves.length; i++) {
 
 			let ebp = 30;
 			let count = 0;
-			battle.on('BasePower', battle.getFormat(), function (basePower) {
+			battle.onEvent('BasePower', battle.getFormat(), function (basePower) {
 				count++;
 				assert.strictEqual(basePower, ebp);
 				if (count % 5 === 0) {
@@ -33,7 +33,7 @@ for (let i = 0; i < moves.length; i++) {
 				}
 			});
 
-			for (let j = 0; j < 8; j++) {
+			for (let i = 0; i < 8; i++) {
 				battle.commitDecisions();
 			}
 			assert.strictEqual(count, 8);
@@ -47,7 +47,7 @@ for (let i = 0; i < moves.length; i++) {
 
 			let ebp = 30;
 			let count = 0;
-			battle.on('Accuracy', battle.getFormat(), function (accuracy, target, pokemon, move) {
+			battle.onEvent('Accuracy', battle.getFormat(), function (accuracy, target, pokemon, move) {
 				if (move.id === 'recover') return;
 
 				count++;
@@ -58,12 +58,12 @@ for (let i = 0; i < moves.length; i++) {
 					return true;
 				}
 			});
-			battle.on('BasePower', battle.getFormat(), function (basePower) {
+			battle.onEvent('BasePower', battle.getFormat(), function (basePower) {
 				assert.strictEqual(basePower, ebp);
 				ebp *= 2;
 			});
 
-			for (let j = 0; j < 5; j++) {
+			for (let i = 0; i < 5; i++) {
 				battle.commitDecisions();
 			}
 			assert.strictEqual(count, 5);
@@ -77,7 +77,7 @@ for (let i = 0; i < moves.length; i++) {
 
 			let ebp = 30;
 			let count = 0;
-			battle.on('BeforeMove', battle.getFormat(), function (attacker, defender, move) {
+			battle.onEvent('BeforeMove', battle.getFormat(), function (attacker, defender, move) {
 				if (move.id === 'recover') return;
 
 				count++;
@@ -86,12 +86,12 @@ for (let i = 0; i < moves.length; i++) {
 					return false; // Imitate immobilization from Paralysis, etc.
 				}
 			});
-			battle.on('BasePower', battle.getFormat(), function (basePower) {
+			battle.onEvent('BasePower', battle.getFormat(), function (basePower) {
 				assert.strictEqual(basePower, ebp);
 				ebp *= 2;
 			});
 
-			for (let j = 0; j < 5; j++) {
+			for (let i = 0; i < 5; i++) {
 				battle.commitDecisions();
 			}
 			assert.strictEqual(count, 5);
@@ -104,7 +104,7 @@ for (let i = 0; i < moves.length; i++) {
 			]);
 
 			let runCount = 0;
-			battle.on('BasePower', battle.getFormat(), function (basePower) {
+			battle.onEvent('BasePower', battle.getFormat(), function (basePower) {
 				assert.strictEqual(basePower, 60);
 				runCount++;
 			});
@@ -122,7 +122,7 @@ for (let i = 0; i < moves.length; i++) {
 			]);
 
 			let hitCount = 0;
-			battle.on('BasePower', battle.getFormat(), function (basePower) {
+			battle.onEvent('BasePower', battle.getFormat(), function (basePower) {
 				assert.strictEqual(basePower, 30);
 				hitCount++;
 			});

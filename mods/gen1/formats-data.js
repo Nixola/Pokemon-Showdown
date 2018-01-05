@@ -53,11 +53,11 @@ exports.BattleFormatsData = {
 		tier: "UU",
 	},
 	caterpie: {
-		randomBattleMoves:["stringshot", "tackle"],
+		randomBattleMoves: ["stringshot", "tackle"],
 		tier: "LC",
 	},
 	metapod: {
-		randomBattleMoves:["stringshot", "tackle", "harden"],
+		randomBattleMoves: ["stringshot", "tackle", "harden"],
 		tier: "NFE",
 	},
 	butterfree: {
@@ -74,7 +74,9 @@ exports.BattleFormatsData = {
 		tier: "NFE",
 	},
 	beedrill: {
-		randomBattleMoves: ["twineedle", "hyperbeam", "swordsdance", "agility"],
+		randomBattleMoves: ["twineedle", "megadrain", "swordsdance"],
+		exclusiveMoves: ["doubleedge", "doubleedge", "hyperbeam"],
+		comboMoves: ["twineedle", "hyperbeam", "swordsdance", "agility"],
 		tier: "UU",
 	},
 	pidgey: {
@@ -110,7 +112,7 @@ exports.BattleFormatsData = {
 	fearow: {
 		randomBattleMoves: ["drillpeck", "doubleedge", "hyperbeam", "agility"],
 		eventPokemon: [
-			{"generation": 1, "level": 20, "moves":["growl", "leer", "furyattack", "payday"]},
+			{"generation": 1, "level": 20, "moves": ["growl", "leer", "furyattack", "payday"]},
 		],
 		tier: "UU",
 	},
@@ -128,9 +130,9 @@ exports.BattleFormatsData = {
 		essentialMove: "thunderbolt",
 		exclusiveMoves: ["bodyslam", "thunder", "agility", "seismictoss"],
 		eventPokemon: [
-			{"generation": 1, "level": 5, "moves":["surf"]},
-			{"generation": 1, "level": 5, "moves":["fly"]},
-			{"generation": 1, "level": 5, "moves":["thundershock", "growl", "surf"]},
+			{"generation": 1, "level": 5, "moves": ["surf"]},
+			{"generation": 1, "level": 5, "moves": ["fly"]},
+			{"generation": 1, "level": 5, "moves": ["thundershock", "growl", "surf"]},
 		],
 		tier: "LC",
 	},
@@ -287,7 +289,7 @@ exports.BattleFormatsData = {
 		essentialMove: "surf",
 		exclusiveMoves: ["bodyslam", "seismictoss", "rest", "hydropump"],
 		eventPokemon: [
-			{"generation": 1, "level": 15, "moves":["scratch", "amnesia"]},
+			{"generation": 1, "level": 15, "moves": ["scratch", "amnesia"]},
 		],
 		tier: "LC",
 	},
@@ -412,7 +414,7 @@ exports.BattleFormatsData = {
 	rapidash: {
 		randomBattleMoves: ["fireblast", "agility", "bodyslam", "hyperbeam"],
 		eventPokemon: [
-			{"generation": 1, "level": 40, "moves":["ember", "firespin", "stomp", "payday"]},
+			{"generation": 1, "level": 40, "moves": ["ember", "firespin", "stomp", "payday"]},
 		],
 		tier: "UU",
 	},
@@ -535,7 +537,7 @@ exports.BattleFormatsData = {
 	exeggcute: {
 		randomBattleMoves: ["sleeppowder", "stunspore"],
 		essentialMove: "psychic",
-		exclusiveMoves: ["megadrain", "explosion"],
+		exclusiveMoves: ["explosion", "explosion", "doubleedge"],
 		tier: "LC",
 	},
 	exeggutor: {
@@ -669,7 +671,7 @@ exports.BattleFormatsData = {
 	magikarp: {
 		randomBattleMoves: ["tackle", "dragonrage"],
 		eventPokemon: [
-			{"generation": 1, "level": 5, "moves":["dragonrage"]},
+			{"generation": 1, "level": 5, "moves": ["dragonrage"]},
 		],
 		tier: "LC",
 	},
@@ -790,7 +792,7 @@ exports.BattleFormatsData = {
 		exclusiveMoves: ["softboiled", "softboiled", "explosion"],
 		comboMoves: ["swordsdance", "earthquake", "hyperbeam"],
 		eventPokemon: [
-			{"generation": 1, "level": 5, "moves":["pound"]},
+			{"generation": 1, "level": 5, "moves": ["pound"]},
 		],
 		eventOnly: true,
 		tier: "Uber",

@@ -4,7 +4,6 @@ exports.BattleItems = {
 	"abomasite": {
 		id: "abomasite",
 		name: "Abomasite",
-		isUnreleased: true,
 		spritenum: 575,
 		megaStone: "Abomasnow-Mega",
 		megaEvolves: "Abomasnow",
@@ -14,7 +13,7 @@ exports.BattleItems = {
 		},
 		num: 674,
 		gen: 6,
-		desc: "If holder is an Abomasnow, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Abomasnow, this item allows it to Mega Evolve in battle.",
 	},
 	"absolite": {
 		id: "absolite",
@@ -28,7 +27,7 @@ exports.BattleItems = {
 		},
 		num: 677,
 		gen: 6,
-		desc: "If holder is an Absol, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Absol, this item allows it to Mega Evolve in battle.",
 	},
 	"absorbbulb": {
 		id: "absorbbulb",
@@ -61,7 +60,7 @@ exports.BattleItems = {
 		},
 		num: 135,
 		gen: 4,
-		desc: "If holder is a Dialga, its Steel- and Dragon-type attacks have 1.2x power.",
+		desc: "If held by a Dialga, its Steel- and Dragon-type attacks have 1.2x power.",
 	},
 	"adrenalineorb": {
 		id: "adrenalineorb",
@@ -91,12 +90,11 @@ exports.BattleItems = {
 		},
 		num: 672,
 		gen: 6,
-		desc: "If holder is an Aerodactyl, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Aerodactyl, this item allows it to Mega Evolve in battle.",
 	},
 	"aggronite": {
 		id: "aggronite",
 		name: "Aggronite",
-		isUnreleased: true,
 		spritenum: 578,
 		megaStone: "Aggron-Mega",
 		megaEvolves: "Aggron",
@@ -106,7 +104,7 @@ exports.BattleItems = {
 		},
 		num: 667,
 		gen: 6,
-		desc: "If holder is an Aggron, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Aggron, this item allows it to Mega Evolve in battle.",
 	},
 	"aguavberry": {
 		id: "aguavberry",
@@ -147,7 +145,7 @@ exports.BattleItems = {
 				this.add('-item', target, 'Air Balloon');
 			}
 		},
-		// airborneness implemented in battle-engine.js:BattlePokemon#isGrounded
+		// airborneness implemented in sim/pokemon.js:Pokemon#isGrounded
 		onAfterDamage: function (damage, target, source, effect) {
 			this.debug('effect: ' + effect.id);
 			if (effect.effectType === 'Move' && effect.id !== 'confused') {
@@ -161,7 +159,9 @@ exports.BattleItems = {
 			this.debug('effect: ' + effect.id);
 			if (effect.effectType === 'Move' && effect.id !== 'confused') {
 				this.add('-enditem', target, 'Air Balloon');
-				target.setItem('');
+				target.item = '';
+				this.itemData = {id: '', target: this};
+				this.runEvent('AfterUseItem', target, null, null, 'airballoon');
 			}
 		},
 		num: 541,
@@ -180,7 +180,7 @@ exports.BattleItems = {
 		},
 		num: 679,
 		gen: 6,
-		desc: "If holder is an Alakazam, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Alakazam, this item allows it to Mega Evolve in battle.",
 	},
 	"aloraichiumz": {
 		id: "aloraichiumz",
@@ -192,12 +192,11 @@ exports.BattleItems = {
 		zMoveUser: ["Raichu-Alola"],
 		num: 803,
 		gen: 7,
-		desc: "If holder is an Alolan Raichu with Thunderbolt, it can use Stoked Sparksurfer.",
+		desc: "If held by an Alolan Raichu with Thunderbolt, it can use Stoked Sparksurfer.",
 	},
 	"altarianite": {
 		id: "altarianite",
 		name: "Altarianite",
-		isUnreleased: true,
 		spritenum: 615,
 		megaStone: "Altaria-Mega",
 		megaEvolves: "Altaria",
@@ -207,12 +206,11 @@ exports.BattleItems = {
 		},
 		num: 755,
 		gen: 6,
-		desc: "If holder is an Altaria, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Altaria, this item allows it to Mega Evolve in battle.",
 	},
 	"ampharosite": {
 		id: "ampharosite",
 		name: "Ampharosite",
-		isUnreleased: true,
 		spritenum: 580,
 		megaStone: "Ampharos-Mega",
 		megaEvolves: "Ampharos",
@@ -222,7 +220,7 @@ exports.BattleItems = {
 		},
 		num: 658,
 		gen: 6,
-		desc: "If holder is an Ampharos, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Ampharos, this item allows it to Mega Evolve in battle.",
 	},
 	"apicotberry": {
 		id: "apicotberry",
@@ -239,7 +237,7 @@ exports.BattleItems = {
 			}
 		},
 		onEat: function (pokemon) {
-			this.boost({spd:1});
+			this.boost({spd: 1});
 		},
 		num: 205,
 		gen: 3,
@@ -291,10 +289,9 @@ exports.BattleItems = {
 			return this.chainModify(1.5);
 		},
 		onDisableMove: function (pokemon) {
-			let moves = pokemon.moveset;
-			for (let i = 0; i < moves.length; i++) {
-				if (this.getMove(moves[i].move).category === 'Status') {
-					pokemon.disableMove(moves[i].id);
+			for (const moveSlot of pokemon.moveSlots) {
+				if (this.getMove(moveSlot.move).category === 'Status') {
+					pokemon.disableMove(moveSlot.id);
 				}
 			}
 		},
@@ -305,7 +302,6 @@ exports.BattleItems = {
 	"audinite": {
 		id: "audinite",
 		name: "Audinite",
-		isUnreleased: true,
 		spritenum: 617,
 		megaStone: "Audino-Mega",
 		megaEvolves: "Audino",
@@ -315,7 +311,7 @@ exports.BattleItems = {
 		},
 		num: 757,
 		gen: 6,
-		desc: "If holder is an Audino, this item allows it to Mega Evolve in battle.",
+		desc: "If held by an Audino, this item allows it to Mega Evolve in battle.",
 	},
 	"babiriberry": {
 		id: "babiriberry",
@@ -343,7 +339,6 @@ exports.BattleItems = {
 	"banettite": {
 		id: "banettite",
 		name: "Banettite",
-		isUnreleased: true,
 		spritenum: 582,
 		megaStone: "Banette-Mega",
 		megaEvolves: "Banette",
@@ -353,7 +348,7 @@ exports.BattleItems = {
 		},
 		num: 668,
 		gen: 6,
-		desc: "If holder is a Banette, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Banette, this item allows it to Mega Evolve in battle.",
 	},
 	"beastball": {
 		id: "beastball",
@@ -375,7 +370,7 @@ exports.BattleItems = {
 		},
 		num: 770,
 		gen: 6,
-		desc: "If holder is a Beedrill, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Beedrill, this item allows it to Mega Evolve in battle.",
 	},
 	"belueberry": {
 		id: "belueberry",
@@ -467,6 +462,15 @@ exports.BattleItems = {
 		onResidualOrder: 5,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
+			if (this.isTerrain('grassyterrain')) return;
+			if (pokemon.hasType('Poison')) {
+				this.heal(pokemon.maxhp / 16);
+			} else {
+				this.damage(pokemon.maxhp / 8);
+			}
+		},
+		onTerrain: function (pokemon) {
+			if (!this.isTerrain('grassyterrain')) return;
 			if (pokemon.hasType('Poison')) {
 				this.heal(pokemon.maxhp / 16);
 			} else {
@@ -506,12 +510,11 @@ exports.BattleItems = {
 		},
 		num: 661,
 		gen: 6,
-		desc: "If holder is a Blastoise, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Blastoise, this item allows it to Mega Evolve in battle.",
 	},
 	"blazikenite": {
 		id: "blazikenite",
 		name: "Blazikenite",
-		isUnreleased: true,
 		spritenum: 584,
 		megaStone: "Blaziken-Mega",
 		megaEvolves: "Blaziken",
@@ -521,7 +524,7 @@ exports.BattleItems = {
 		},
 		num: 664,
 		gen: 6,
-		desc: "If holder is a Blaziken, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Blaziken, this item allows it to Mega Evolve in battle.",
 	},
 	"blueorb": {
 		id: "blueorb",
@@ -544,7 +547,7 @@ exports.BattleItems = {
 				this.add('detailschange', pokemon, pokemon.details);
 				this.add('-primal', pokemon);
 			}
-			pokemon.setAbility(template.abilities['0']);
+			pokemon.setAbility(template.abilities['0'], null, true);
 			pokemon.baseAbility = pokemon.ability;
 		},
 		onTakeItem: function (item, source) {
@@ -553,7 +556,7 @@ exports.BattleItems = {
 		},
 		num: 535,
 		gen: 6,
-		desc: "If holder is a Kyogre, this item triggers its Primal Reversion in battle.",
+		desc: "If held by a Kyogre, this item triggers its Primal Reversion in battle.",
 	},
 	"blukberry": {
 		id: "blukberry",
@@ -652,7 +655,6 @@ exports.BattleItems = {
 	"cameruptite": {
 		id: "cameruptite",
 		name: "Cameruptite",
-		isUnreleased: true,
 		spritenum: 625,
 		megaStone: "Camerupt-Mega",
 		megaEvolves: "Camerupt",
@@ -662,7 +664,7 @@ exports.BattleItems = {
 		},
 		num: 767,
 		gen: 6,
-		desc: "If holder is a Camerupt, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Camerupt, this item allows it to Mega Evolve in battle.",
 	},
 	"cellbattery": {
 		id: "cellbattery",
@@ -709,7 +711,7 @@ exports.BattleItems = {
 		},
 		num: 660,
 		gen: 6,
-		desc: "If holder is a Charizard, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Charizard, this item allows it to Mega Evolve in battle.",
 	},
 	"charizarditey": {
 		id: "charizarditey",
@@ -723,7 +725,7 @@ exports.BattleItems = {
 		},
 		num: 678,
 		gen: 6,
-		desc: "If holder is a Charizard, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Charizard, this item allows it to Mega Evolve in battle.",
 	},
 	"chartiberry": {
 		id: "chartiberry",
@@ -1035,7 +1037,7 @@ exports.BattleItems = {
 		onModifyPriority: function (priority, pokemon) {
 			if (pokemon.hp <= pokemon.maxhp / 4 || (pokemon.hp <= pokemon.maxhp / 2 && pokemon.hasAbility('gluttony'))) {
 				if (pokemon.eatItem()) {
-					this.add('-activate', pokemon, 'item: Custap Berry');
+					this.add('-activate', pokemon, 'item: Custap Berry', '[consumed]');
 					pokemon.removeVolatile('custapberry');
 					return Math.round(priority) + 0.1;
 				}
@@ -1115,11 +1117,11 @@ exports.BattleItems = {
 		zMoveUser: ["Decidueye"],
 		num: 798,
 		gen: 7,
-		desc: "If holder is a Decidueye with Spirit Shackle, it can use Sinister Arrow Raid.",
+		desc: "If held by a Decidueye with Spirit Shackle, it can use Sinister Arrow Raid.",
 	},
 	"deepseascale": {
 		id: "deepseascale",
-		name: "DeepSeaScale",
+		name: "Deep Sea Scale",
 		spritenum: 93,
 		fling: {
 			basePower: 30,
@@ -1132,11 +1134,11 @@ exports.BattleItems = {
 		},
 		num: 227,
 		gen: 3,
-		desc: "If holder is a Clamperl, its Sp. Def is doubled.",
+		desc: "If held by a Clamperl, its Sp. Def is doubled.",
 	},
 	"deepseatooth": {
 		id: "deepseatooth",
-		name: "DeepSeaTooth",
+		name: "Deep Sea Tooth",
 		spritenum: 94,
 		fling: {
 			basePower: 90,
@@ -1149,7 +1151,7 @@ exports.BattleItems = {
 		},
 		num: 226,
 		gen: 3,
-		desc: "If holder is a Clamperl, its Sp. Atk is doubled.",
+		desc: "If held by a Clamperl, its Sp. Atk is doubled.",
 	},
 	"destinyknot": {
 		id: "destinyknot",
@@ -1171,7 +1173,6 @@ exports.BattleItems = {
 	"diancite": {
 		id: "diancite",
 		name: "Diancite",
-		isUnreleased: true,
 		spritenum: 624,
 		megaStone: "Diancie-Mega",
 		megaEvolves: "Diancie",
@@ -1181,7 +1182,7 @@ exports.BattleItems = {
 		},
 		num: 764,
 		gen: 6,
-		desc: "If holder is a Diancie, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Diancie, this item allows it to Mega Evolve in battle.",
 	},
 	"diveball": {
 		id: "diveball",
@@ -1390,7 +1391,7 @@ exports.BattleItems = {
 		zMoveUser: ["Eevee"],
 		num: 805,
 		gen: 7,
-		desc: "If holder is an Eevee with Last Resort, it can use Extreme Evoboost.",
+		desc: "If held by an Eevee with Last Resort, it can use Extreme Evoboost.",
 	},
 	"ejectbutton": {
 		id: "ejectbutton",
@@ -1431,7 +1432,7 @@ exports.BattleItems = {
 		spritenum: 120,
 		isGem: true,
 		onSourceTryPrimaryHit: function (target, source, move) {
-			if (target === source || move.category === 'Status' || move.id in {firepledge:1, grasspledge:1, waterpledge:1}) return;
+			if (target === source || move.category === 'Status' || ['firepledge', 'grasspledge', 'waterpledge'].includes(move.id)) return;
 			if (move.type === 'Electric') {
 				if (source.useItem()) {
 					this.add('-enditem', source, 'Electric Gem', '[from] gem', '[move] ' + move.name);
@@ -1701,7 +1702,7 @@ exports.BattleItems = {
 		spritenum: 141,
 		isGem: true,
 		onSourceTryPrimaryHit: function (target, source, move) {
-			if (target === source || move.category === 'Status' || move.id in {firepledge:1, grasspledge:1, waterpledge:1}) return;
+			if (target === source || move.category === 'Status' || ['firepledge', 'grasspledge', 'waterpledge'].includes(move.id)) return;
 			if (move.type === 'Fire') {
 				if (source.useItem()) {
 					this.add('-enditem', source, 'Fire Gem', '[from] gem', '[move] ' + move.name);
@@ -1775,7 +1776,7 @@ exports.BattleItems = {
 		onResidualOrder: 26,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
-			pokemon.trySetStatus('brn');
+			pokemon.trySetStatus('brn', pokemon);
 		},
 		num: 273,
 		gen: 4,
@@ -1925,7 +1926,6 @@ exports.BattleItems = {
 	"galladite": {
 		id: "galladite",
 		name: "Galladite",
-		isUnreleased: true,
 		spritenum: 616,
 		megaStone: "Gallade-Mega",
 		megaEvolves: "Gallade",
@@ -1935,7 +1935,7 @@ exports.BattleItems = {
 		},
 		num: 756,
 		gen: 6,
-		desc: "If holder is a Gallade, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Gallade, this item allows it to Mega Evolve in battle.",
 	},
 	"ganlonberry": {
 		id: "ganlonberry",
@@ -1952,7 +1952,7 @@ exports.BattleItems = {
 			}
 		},
 		onEat: function (pokemon) {
-			this.boost({def:1});
+			this.boost({def: 1});
 		},
 		num: 202,
 		gen: 3,
@@ -1970,12 +1970,11 @@ exports.BattleItems = {
 		},
 		num: 683,
 		gen: 6,
-		desc: "If holder is a Garchomp, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Garchomp, this item allows it to Mega Evolve in battle.",
 	},
 	"gardevoirite": {
 		id: "gardevoirite",
 		name: "Gardevoirite",
-		isUnreleased: true,
 		spritenum: 587,
 		megaStone: "Gardevoir-Mega",
 		megaEvolves: "Gardevoir",
@@ -1985,7 +1984,7 @@ exports.BattleItems = {
 		},
 		num: 657,
 		gen: 6,
-		desc: "If holder is a Gardevoir, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Gardevoir, this item allows it to Mega Evolve in battle.",
 	},
 	"gengarite": {
 		id: "gengarite",
@@ -1999,7 +1998,7 @@ exports.BattleItems = {
 		},
 		num: 656,
 		gen: 6,
-		desc: "If holder is a Gengar, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Gengar, this item allows it to Mega Evolve in battle.",
 	},
 	"ghostgem": {
 		id: "ghostgem",
@@ -2061,7 +2060,7 @@ exports.BattleItems = {
 		},
 		num: 763,
 		gen: 6,
-		desc: "If holder is a Glalie, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Glalie, this item allows it to Mega Evolve in battle.",
 	},
 	"grassgem": {
 		id: "grassgem",
@@ -2070,7 +2069,7 @@ exports.BattleItems = {
 		spritenum: 172,
 		isGem: true,
 		onSourceTryPrimaryHit: function (target, source, move) {
-			if (target === source || move.category === 'Status' || move.id in {firepledge:1, grasspledge:1, waterpledge:1}) return;
+			if (target === source || move.category === 'Status' || ['firepledge', 'grasspledge', 'waterpledge'].includes(move.id)) return;
 			if (move.type === 'Grass') {
 				if (source.useItem()) {
 					this.add('-enditem', source, 'Grass Gem', '[from] gem', '[move] ' + move.name);
@@ -2183,7 +2182,7 @@ exports.BattleItems = {
 		forcedForme: "Giratina-Origin",
 		num: 112,
 		gen: 4,
-		desc: "If holder is a Giratina, its Ghost- and Dragon-type attacks have 1.2x power.",
+		desc: "If held by a Giratina, its Ghost- and Dragon-type attacks have 1.2x power.",
 	},
 	"groundgem": {
 		id: "groundgem",
@@ -2245,7 +2244,7 @@ exports.BattleItems = {
 		},
 		num: 676,
 		gen: 6,
-		desc: "If holder is a Gyarados, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Gyarados, this item allows it to Mega Evolve in battle.",
 	},
 	"habanberry": {
 		id: "habanberry",
@@ -2328,7 +2327,6 @@ exports.BattleItems = {
 	"heracronite": {
 		id: "heracronite",
 		name: "Heracronite",
-		isUnreleased: true,
 		spritenum: 590,
 		megaStone: "Heracross-Mega",
 		megaEvolves: "Heracross",
@@ -2338,7 +2336,7 @@ exports.BattleItems = {
 		},
 		num: 680,
 		gen: 6,
-		desc: "If holder is a Heracross, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Heracross, this item allows it to Mega Evolve in battle.",
 	},
 	"hondewberry": {
 		id: "hondewberry",
@@ -2357,7 +2355,6 @@ exports.BattleItems = {
 	"houndoominite": {
 		id: "houndoominite",
 		name: "Houndoominite",
-		isUnreleased: true,
 		spritenum: 591,
 		megaStone: "Houndoom-Mega",
 		megaEvolves: "Houndoom",
@@ -2367,7 +2364,7 @@ exports.BattleItems = {
 		},
 		num: 666,
 		gen: 6,
-		desc: "If holder is a Houndoom, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Houndoom, this item allows it to Mega Evolve in battle.",
 	},
 	"iapapaberry": {
 		id: "iapapaberry",
@@ -2487,7 +2484,7 @@ exports.BattleItems = {
 		zMoveUser: ["Incineroar"],
 		num: 799,
 		gen: 7,
-		desc: "If holder is an Incineroar with Darkest Lariat, it can use Malicious Moonsault.",
+		desc: "If held by an Incineroar with Darkest Lariat, it can use Malicious Moonsault.",
 	},
 	"insectplate": {
 		id: "insectplate",
@@ -2522,7 +2519,7 @@ exports.BattleItems = {
 			if (target.volatiles['ingrain'] || target.volatiles['smackdown'] || this.getPseudoWeather('gravity')) return;
 			if (move.type === 'Ground' && target.hasType('Flying')) return 0;
 		},
-		// airborneness negation implemented in battle-engine.js:BattlePokemon#isGrounded
+		// airborneness negation implemented in sim/pokemon.js:Pokemon#isGrounded
 		onModifySpe: function (spe) {
 			return this.chainModify(0.5);
 		},
@@ -2667,7 +2664,7 @@ exports.BattleItems = {
 		},
 		num: 675,
 		gen: 6,
-		desc: "If holder is a Kangaskhan, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Kangaskhan, this item allows it to Mega Evolve in battle.",
 	},
 	"kingsrock": {
 		id: "kingsrock",
@@ -2693,6 +2690,18 @@ exports.BattleItems = {
 		num: 221,
 		gen: 2,
 		desc: "Holder's attacks without a chance to flinch gain a 10% chance to flinch.",
+	},
+	"kommoniumz": {
+		id: "kommoniumz",
+		name: "Kommonium Z",
+		spritenum: 690,
+		onTakeItem: false,
+		zMove: "Clangorous Soulblaze",
+		zMoveFrom: "Clanging Scales",
+		zMoveUser: ["Kommo-o", "Kommo-o-Totem"],
+		num: 926,
+		gen: 7,
+		desc: "If held by a Kommo-o with Clanging Scales, it can use Clangorous Soulblaze.",
 	},
 	"laggingtail": {
 		id: "laggingtail",
@@ -2732,7 +2741,6 @@ exports.BattleItems = {
 	"latiasite": {
 		id: "latiasite",
 		name: "Latiasite",
-		isUnreleased: true,
 		spritenum: 629,
 		megaStone: "Latias-Mega",
 		megaEvolves: "Latias",
@@ -2742,12 +2750,11 @@ exports.BattleItems = {
 		},
 		num: 684,
 		gen: 6,
-		desc: "If holder is a Latias, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Latias, this item allows it to Mega Evolve in battle.",
 	},
 	"latiosite": {
 		id: "latiosite",
 		name: "Latiosite",
-		isUnreleased: true,
 		spritenum: 630,
 		megaStone: "Latios-Mega",
 		megaEvolves: "Latios",
@@ -2757,7 +2764,7 @@ exports.BattleItems = {
 		},
 		num: 685,
 		gen: 6,
-		desc: "If holder is a Latios, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Latios, this item allows it to Mega Evolve in battle.",
 	},
 	"laxincense": {
 		id: "laxincense",
@@ -2785,6 +2792,11 @@ exports.BattleItems = {
 		onResidualOrder: 5,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
+			if (this.isTerrain('grassyterrain')) return;
+			this.heal(pokemon.maxhp / 16);
+		},
+		onTerrain: function (pokemon) {
+			if (!this.isTerrain('grassyterrain')) return;
 			this.heal(pokemon.maxhp / 16);
 		},
 		num: 234,
@@ -2802,30 +2814,30 @@ exports.BattleItems = {
 		},
 		onUpdate: function (pokemon) {
 			if (!pokemon.hp) return;
-			let move = pokemon.getMoveData(pokemon.lastMove);
-			if (move && move.pp === 0) {
+			let moveSlot = pokemon.lastMove && pokemon.getMoveData(pokemon.lastMove.id);
+			if (moveSlot && moveSlot.pp === 0) {
 				pokemon.addVolatile('leppaberry');
-				pokemon.volatiles['leppaberry'].move = move;
+				pokemon.volatiles['leppaberry'].moveSlot = moveSlot;
 				pokemon.eatItem();
 			}
 		},
 		onEat: function (pokemon) {
-			let move;
+			let moveSlot;
 			if (pokemon.volatiles['leppaberry']) {
-				move = pokemon.volatiles['leppaberry'].move;
+				moveSlot = pokemon.volatiles['leppaberry'].moveSlot;
 				pokemon.removeVolatile('leppaberry');
 			} else {
 				let pp = 99;
-				for (let moveid in pokemon.moveset) {
-					if (pokemon.moveset[moveid].pp < pp) {
-						move = pokemon.moveset[moveid];
-						pp = move.pp;
+				for (const possibleMoveSlot of pokemon.moveSlots) {
+					if (possibleMoveSlot.pp < pp) {
+						moveSlot = possibleMoveSlot;
+						pp = moveSlot.pp;
 					}
 				}
 			}
-			move.pp += 10;
-			if (move.pp > move.maxpp) move.pp = move.maxpp;
-			this.add('-activate', pokemon, 'item: Leppa Berry', move.move);
+			moveSlot.pp += 10;
+			if (moveSlot.pp > moveSlot.maxpp) moveSlot.pp = moveSlot.maxpp;
+			this.add('-activate', pokemon, 'item: Leppa Berry', moveSlot.move, '[consumed]');
 			if (pokemon.item !== 'leppaberry') {
 				let foeActive = pokemon.side.foe.active;
 				let foeIsStale = false;
@@ -2867,7 +2879,7 @@ exports.BattleItems = {
 			}
 		},
 		onEat: function (pokemon) {
-			this.boost({atk:1});
+			this.boost({atk: 1});
 		},
 		num: 201,
 		gen: 3,
@@ -2914,7 +2926,7 @@ exports.BattleItems = {
 		},
 		num: 236,
 		gen: 2,
-		desc: "If holder is a Pikachu, its Attack and Sp. Atk are doubled.",
+		desc: "If held by a Pikachu, its Attack and Sp. Atk are doubled.",
 	},
 	"lightclay": {
 		id: "lightclay",
@@ -2931,7 +2943,6 @@ exports.BattleItems = {
 	"lopunnite": {
 		id: "lopunnite",
 		name: "Lopunnite",
-		isUnreleased: true,
 		spritenum: 626,
 		megaStone: "Lopunny-Mega",
 		megaEvolves: "Lopunny",
@@ -2941,7 +2952,7 @@ exports.BattleItems = {
 		},
 		num: 768,
 		gen: 6,
-		desc: "If holder is a Lopunny, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Lopunny, this item allows it to Mega Evolve in battle.",
 	},
 	"loveball": {
 		id: "loveball",
@@ -2963,7 +2974,7 @@ exports.BattleItems = {
 		},
 		num: 673,
 		gen: 6,
-		desc: "If holder is a Lucario, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Lucario, this item allows it to Mega Evolve in battle.",
 	},
 	"luckypunch": {
 		id: "luckypunch",
@@ -2979,7 +2990,7 @@ exports.BattleItems = {
 		},
 		num: 256,
 		gen: 2,
-		desc: "If holder is a Chansey, its critical hit ratio is raised by 2 stages.",
+		desc: "If held by a Chansey, its critical hit ratio is raised by 2 stages.",
 	},
 	"lumberry": {
 		id: "lumberry",
@@ -3019,6 +3030,18 @@ exports.BattleItems = {
 		gen: 6,
 		desc: "Raises holder's Sp. Def by 1 stage if hit by a Water-type attack. Single use.",
 	},
+	"lunaliumz": {
+		id: "lunaliumz",
+		name: "Lunalium Z",
+		spritenum: 686,
+		onTakeItem: false,
+		zMove: "Menacing Moonraze Maelstrom",
+		zMoveFrom: "Moongeist Beam",
+		zMoveUser: ["Lunala", "Necrozma-Dawn-Wings"],
+		num: 922,
+		gen: 7,
+		desc: "Lunala or Dawn Wings Necrozma with Moongeist Beam can use a special Z-Move.",
+	},
 	"lureball": {
 		id: "lureball",
 		name: "Lure Ball",
@@ -3042,7 +3065,7 @@ exports.BattleItems = {
 		},
 		num: 136,
 		gen: 4,
-		desc: "If holder is a Palkia, its Water- and Dragon-type attacks have 1.2x power.",
+		desc: "If held by a Palkia, its Water- and Dragon-type attacks have 1.2x power.",
 	},
 	"luxuryball": {
 		id: "luxuryball",
@@ -3051,6 +3074,18 @@ exports.BattleItems = {
 		num: 11,
 		gen: 3,
 		desc: "A comfortable Poke Ball that makes a caught wild Pokemon quickly grow friendly.",
+	},
+	"lycaniumz": {
+		id: "lycaniumz",
+		name: "Lycanium Z",
+		spritenum: 689,
+		onTakeItem: false,
+		zMove: "Splintered Stormshards",
+		zMoveFrom: "Stone Edge",
+		zMoveUser: ["Lycanroc", "Lycanroc-Midnight", "Lycanroc-Dusk"],
+		num: 925,
+		gen: 7,
+		desc: "If held by a Lycanroc forme with Stone Edge, it can use Splintered Stormshards.",
 	},
 	"machobrace": {
 		id: "machobrace",
@@ -3142,7 +3177,6 @@ exports.BattleItems = {
 	"manectite": {
 		id: "manectite",
 		name: "Manectite",
-		isUnreleased: true,
 		spritenum: 596,
 		megaStone: "Manectric-Mega",
 		megaEvolves: "Manectric",
@@ -3152,7 +3186,7 @@ exports.BattleItems = {
 		},
 		num: 682,
 		gen: 6,
-		desc: "If holder is a Manectric, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Manectric, this item allows it to Mega Evolve in battle.",
 	},
 	"marangaberry": {
 		id: "marangaberry",
@@ -3178,7 +3212,6 @@ exports.BattleItems = {
 	"marshadiumz": {
 		id: "marshadiumz",
 		name: "Marshadium Z",
-		isUnreleased: true,
 		spritenum: 654,
 		onTakeItem: false,
 		zMove: "Soul-Stealing 7-Star Strike",
@@ -3186,7 +3219,7 @@ exports.BattleItems = {
 		zMoveUser: ["Marshadow"],
 		num: 802,
 		gen: 7,
-		desc: "If holder is Marshadow with Spectral Thief, it can use Soul-Stealing 7-Star Strike.",
+		desc: "If held by Marshadow with Spectral Thief, it can use Soul-Stealing 7-Star Strike.",
 	},
 	"masterball": {
 		id: "masterball",
@@ -3208,7 +3241,7 @@ exports.BattleItems = {
 		},
 		num: 681,
 		gen: 6,
-		desc: "If holder is a Mawile, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Mawile, this item allows it to Mega Evolve in battle.",
 	},
 	"meadowplate": {
 		id: "meadowplate",
@@ -3235,7 +3268,6 @@ exports.BattleItems = {
 	"medichamite": {
 		id: "medichamite",
 		name: "Medichamite",
-		isUnreleased: true,
 		spritenum: 599,
 		megaStone: "Medicham-Mega",
 		megaEvolves: "Medicham",
@@ -3245,7 +3277,7 @@ exports.BattleItems = {
 		},
 		num: 665,
 		gen: 6,
-		desc: "If holder is a Medicham, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Medicham, this item allows it to Mega Evolve in battle.",
 	},
 	"mentalherb": {
 		id: "mentalherb",
@@ -3299,7 +3331,7 @@ exports.BattleItems = {
 		},
 		num: 758,
 		gen: 6,
-		desc: "If holder is a Metagross, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Metagross, this item allows it to Mega Evolve in battle.",
 	},
 	"metalcoat": {
 		id: "metalcoat",
@@ -3333,7 +3365,7 @@ exports.BattleItems = {
 		},
 		num: 257,
 		gen: 2,
-		desc: "If holder is a Ditto that hasn't Transformed, its Defense is doubled.",
+		desc: "If held by a Ditto that hasn't Transformed, its Defense is doubled.",
 	},
 	"metronome": {
 		id: "metronome",
@@ -3382,7 +3414,7 @@ exports.BattleItems = {
 		zMoveUser: ["Mew"],
 		num: 806,
 		gen: 7,
-		desc: "If holder is a Mew with Psychic, it can use Genesis Supernova.",
+		desc: "If held by a Mew with Psychic, it can use Genesis Supernova.",
 	},
 	"mewtwonitex": {
 		id: "mewtwonitex",
@@ -3396,7 +3428,7 @@ exports.BattleItems = {
 		},
 		num: 662,
 		gen: 6,
-		desc: "If holder is a Mewtwo, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Mewtwo, this item allows it to Mega Evolve in battle.",
 	},
 	"mewtwonitey": {
 		id: "mewtwonitey",
@@ -3410,7 +3442,7 @@ exports.BattleItems = {
 		},
 		num: 663,
 		gen: 6,
-		desc: "If holder is a Mewtwo, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Mewtwo, this item allows it to Mega Evolve in battle.",
 	},
 	"micleberry": {
 		id: "micleberry",
@@ -3443,6 +3475,18 @@ exports.BattleItems = {
 		num: 209,
 		gen: 4,
 		desc: "Holder's next move has 1.2x accuracy when at 1/4 max HP or less. Single use.",
+	},
+	"mimikiumz": {
+		id: "mimikiumz",
+		name: "Mimikium Z",
+		spritenum: 688,
+		onTakeItem: false,
+		zMove: "Let's Snuggle Forever",
+		zMoveFrom: "Play Rough",
+		zMoveUser: ["Mimikyu", "Mimikyu-Busted", "Mimikyu-Totem", "Mimikyu-Busted-Totem"],
+		num: 924,
+		gen: 7,
+		desc: "If held by a Mimikyu with Play Rough, it can use Let's Snuggle Forever.",
 	},
 	"mindplate": {
 		id: "mindplate",
@@ -3610,7 +3654,7 @@ exports.BattleItems = {
 		spritenum: 307,
 		isGem: true,
 		onSourceTryPrimaryHit: function (target, source, move) {
-			if (target === source || move.category === 'Status' || move.id in {firepledge:1, grasspledge:1, waterpledge:1}) return;
+			if (target === source || move.category === 'Status' || ['firepledge', 'grasspledge', 'waterpledge'].includes(move.id)) return;
 			if (move.type === 'Normal') {
 				if (source.useItem()) {
 					this.add('-enditem', source, 'Normal Gem', '[from] gem', '[move] ' + move.name);
@@ -3836,7 +3880,7 @@ exports.BattleItems = {
 			}
 		},
 		onEat: function (pokemon) {
-			this.boost({spa:1});
+			this.boost({spa: 1});
 		},
 		num: 204,
 		gen: 3,
@@ -3845,7 +3889,6 @@ exports.BattleItems = {
 	"pidgeotite": {
 		id: "pidgeotite",
 		name: "Pidgeotite",
-		isUnreleased: true,
 		spritenum: 622,
 		megaStone: "Pidgeot-Mega",
 		megaEvolves: "Pidgeot",
@@ -3855,7 +3898,7 @@ exports.BattleItems = {
 		},
 		num: 762,
 		gen: 6,
-		desc: "If holder is a Pidgeot, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Pidgeot, this item allows it to Mega Evolve in battle.",
 	},
 	"pikaniumz": {
 		id: "pikaniumz",
@@ -3867,20 +3910,19 @@ exports.BattleItems = {
 		zMoveUser: ["Pikachu"],
 		num: 794,
 		gen: 7,
-		desc: "If holder is a Pikachu with Volt Tackle, it can use Catastropika.",
+		desc: "If held by a Pikachu with Volt Tackle, it can use Catastropika.",
 	},
 	"pikashuniumz": {
 		id: "pikashuniumz",
 		name: "Pikashunium Z",
-		isUnreleased: true,
 		spritenum: 659,
 		onTakeItem: false,
 		zMove: "10,000,000 Volt Thunderbolt",
 		zMoveFrom: "Thunderbolt",
-		zMoveUser: ["Pikachu-Original", "Pikachu-Hoenn", "Pikachu-Sinnoh", "Pikachu-Unova", "Pikachu-Kalos", "Pikachu-Alola"],
+		zMoveUser: ["Pikachu-Original", "Pikachu-Hoenn", "Pikachu-Sinnoh", "Pikachu-Unova", "Pikachu-Kalos", "Pikachu-Alola", "Pikachu-Partner"],
 		num: 836,
 		gen: 7,
-		desc: "If holder is cap Pikachu with Thunderbolt, it can use 10,000,000 Volt Thunderbolt.",
+		desc: "If held by cap Pikachu with Thunderbolt, it can use 10,000,000 Volt Thunderbolt.",
 	},
 	"pinapberry": {
 		id: "pinapberry",
@@ -3908,7 +3950,7 @@ exports.BattleItems = {
 		},
 		num: 671,
 		gen: 6,
-		desc: "If holder is a Pinsir, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Pinsir, this item allows it to Mega Evolve in battle.",
 	},
 	"pixieplate": {
 		id: "pixieplate",
@@ -4156,7 +4198,7 @@ exports.BattleItems = {
 		zMoveUser: ["Primarina"],
 		num: 800,
 		gen: 7,
-		desc: "If holder is a Primarina with Sparkling Aria, it can use Oceanic Operetta.",
+		desc: "If held by a Primarina with Sparkling Aria, it can use Oceanic Operetta.",
 	},
 	"protectivepads": {
 		id: "protectivepads",
@@ -4290,7 +4332,7 @@ exports.BattleItems = {
 		},
 		num: 274,
 		gen: 4,
-		desc: "If holder is a Ditto that hasn't Transformed, its Speed is doubled.",
+		desc: "If held by a Ditto that hasn't Transformed, its Speed is doubled.",
 	},
 	"rabutaberry": {
 		id: "rabutaberry",
@@ -4405,7 +4447,7 @@ exports.BattleItems = {
 		onAfterMoveSecondary: function (target, source, move) {
 			if (source && source !== target && source.hp && target.hp && move && move.category !== 'Status') {
 				if (!source.isActive || !this.canSwitch(source.side) || source.forceSwitchFlag || target.forceSwitchFlag) return;
-				if (target.useItem(null, source)) { // This order is correct - the item is used up even against a pokemon with Ingrain or that otherwise can't be forced out
+				if (target.useItem(source)) { // This order is correct - the item is used up even against a pokemon with Ingrain or that otherwise can't be forced out
 					if (this.runEvent('DragOut', source, target, move)) {
 						source.forceSwitchFlag = true;
 					}
@@ -4437,7 +4479,7 @@ exports.BattleItems = {
 				this.add('detailschange', pokemon, pokemon.details);
 				this.add('-primal', pokemon);
 			}
-			pokemon.setAbility(template.abilities['0']);
+			pokemon.setAbility(template.abilities['0'], null, true);
 			pokemon.baseAbility = pokemon.ability;
 		},
 		onTakeItem: function (item, source) {
@@ -4446,7 +4488,7 @@ exports.BattleItems = {
 		},
 		num: 534,
 		gen: 6,
-		desc: "If holder is a Groudon, this item triggers its Primal Reversion in battle.",
+		desc: "If held by a Groudon, this item triggers its Primal Reversion in battle.",
 	},
 	"repeatball": {
 		id: "repeatball",
@@ -4658,7 +4700,7 @@ exports.BattleItems = {
 		},
 		num: 754,
 		gen: 6,
-		desc: "If holder is a Sableye, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Sableye, this item allows it to Mega Evolve in battle.",
 	},
 	"safariball": {
 		id: "safariball",
@@ -4703,7 +4745,7 @@ exports.BattleItems = {
 			}
 		},
 		onEat: function (pokemon) {
-			this.boost({spe:1});
+			this.boost({spe: 1});
 		},
 		num: 203,
 		gen: 3,
@@ -4721,12 +4763,11 @@ exports.BattleItems = {
 		},
 		num: 769,
 		gen: 6,
-		desc: "If holder is a Salamence, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Salamence, this item allows it to Mega Evolve in battle.",
 	},
 	"sceptilite": {
 		id: "sceptilite",
 		name: "Sceptilite",
-		isUnreleased: true,
 		spritenum: 613,
 		megaStone: "Sceptile-Mega",
 		megaEvolves: "Sceptile",
@@ -4736,7 +4777,7 @@ exports.BattleItems = {
 		},
 		num: 753,
 		gen: 6,
-		desc: "If holder is a Sceptile, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Sceptile, this item allows it to Mega Evolve in battle.",
 	},
 	"scizorite": {
 		id: "scizorite",
@@ -4750,7 +4791,7 @@ exports.BattleItems = {
 		},
 		num: 670,
 		gen: 6,
-		desc: "If holder is a Scizor, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Scizor, this item allows it to Mega Evolve in battle.",
 	},
 	"scopelens": {
 		id: "scopelens",
@@ -4812,7 +4853,7 @@ exports.BattleItems = {
 		},
 		num: 759,
 		gen: 6,
-		desc: "If holder is a Sharpedo, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Sharpedo, this item allows it to Mega Evolve in battle.",
 	},
 	"shedshell": {
 		id: "shedshell",
@@ -4988,7 +5029,7 @@ exports.BattleItems = {
 		},
 		num: 760,
 		gen: 6,
-		desc: "If holder is a Slowbro, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Slowbro, this item allows it to Mega Evolve in battle.",
 	},
 	"smoothrock": {
 		id: "smoothrock",
@@ -5011,7 +5052,7 @@ exports.BattleItems = {
 		zMoveUser: ["Snorlax"],
 		num: 804,
 		gen: 7,
-		desc: "If holder is a Snorlax with Giga Impact, it can use Pulverizing Pancake.",
+		desc: "If held by a Snorlax with Giga Impact, it can use Pulverizing Pancake.",
 	},
 	"snowball": {
 		id: "snowball",
@@ -5046,6 +5087,18 @@ exports.BattleItems = {
 		gen: 2,
 		desc: "Holder's Ground-type attacks have 1.2x power.",
 	},
+	"solganiumz": {
+		id: "solganiumz",
+		name: "Solganium Z",
+		spritenum: 685,
+		onTakeItem: false,
+		zMove: "Searing Sunraze Smash",
+		zMoveFrom: "Sunsteel Strike",
+		zMoveUser: ["Solgaleo", "Necrozma-Dusk-Mane"],
+		num: 921,
+		gen: 7,
+		desc: "Solgaleo or Dusk Mane Necrozma with Sunsteel Strike can use a special Z-Move.",
+	},
 	"souldew": {
 		id: "souldew",
 		name: "Soul Dew",
@@ -5061,7 +5114,7 @@ exports.BattleItems = {
 		},
 		num: 225,
 		gen: 3,
-		desc: "If holder's a Latias/Latios, its Dragon- and Psychic-type moves have 1.2x power.",
+		desc: "If held by a Latias/Latios, its Dragon- and Psychic-type moves have 1.2x power.",
 	},
 	"spelltag": {
 		id: "spelltag",
@@ -5182,7 +5235,6 @@ exports.BattleItems = {
 	"steelixite": {
 		id: "steelixite",
 		name: "Steelixite",
-		isUnreleased: true,
 		spritenum: 621,
 		megaStone: "Steelix-Mega",
 		megaEvolves: "Steelix",
@@ -5192,7 +5244,7 @@ exports.BattleItems = {
 		},
 		num: 761,
 		gen: 6,
-		desc: "If holder is a Steelix, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Steelix, this item allows it to Mega Evolve in battle.",
 	},
 	"steelgem": {
 		id: "steelgem",
@@ -5256,7 +5308,7 @@ exports.BattleItems = {
 		},
 		num: 259,
 		gen: 2,
-		desc: "If holder is a Farfetch'd, its critical hit ratio is raised by 2 stages.",
+		desc: "If held by a Farfetch'd, its critical hit ratio is raised by 2 stages.",
 	},
 	"stickybarb": {
 		id: "stickybarb",
@@ -5306,7 +5358,6 @@ exports.BattleItems = {
 	"swampertite": {
 		id: "swampertite",
 		name: "Swampertite",
-		isUnreleased: true,
 		spritenum: 612,
 		megaStone: "Swampert-Mega",
 		megaEvolves: "Swampert",
@@ -5316,7 +5367,7 @@ exports.BattleItems = {
 		},
 		num: 752,
 		gen: 6,
-		desc: "If holder is a Swampert, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Swampert, this item allows it to Mega Evolve in battle.",
 	},
 	"tamatoberry": {
 		id: "tamatoberry",
@@ -5365,7 +5416,7 @@ exports.BattleItems = {
 		zMoveUser: ["Tapu Koko", "Tapu Lele", "Tapu Bulu", "Tapu Fini"],
 		num: 801,
 		gen: 7,
-		desc: "If holder is a Tapu with Nature's Madness, it can use Guardian of Alola.",
+		desc: "If held by a Tapu with Nature's Madness, it can use Guardian of Alola.",
 	},
 	"terrainextender": {
 		id: "terrainextender",
@@ -5393,7 +5444,7 @@ exports.BattleItems = {
 		},
 		num: 258,
 		gen: 2,
-		desc: "If holder is a Cubone or a Marowak, its Attack is doubled.",
+		desc: "If held by a Cubone or a Marowak, its Attack is doubled.",
 	},
 	"timerball": {
 		id: "timerball",
@@ -5414,7 +5465,7 @@ exports.BattleItems = {
 		onResidualOrder: 26,
 		onResidualSubOrder: 2,
 		onResidual: function (pokemon) {
-			pokemon.trySetStatus('tox');
+			pokemon.trySetStatus('tox', pokemon);
 		},
 		num: 272,
 		gen: 4,
@@ -5462,7 +5513,6 @@ exports.BattleItems = {
 	"tyranitarite": {
 		id: "tyranitarite",
 		name: "Tyranitarite",
-		isUnreleased: true,
 		spritenum: 607,
 		megaStone: "Tyranitar-Mega",
 		megaEvolves: "Tyranitar",
@@ -5472,7 +5522,7 @@ exports.BattleItems = {
 		},
 		num: 669,
 		gen: 6,
-		desc: "If holder is a Tyranitar, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Tyranitar, this item allows it to Mega Evolve in battle.",
 	},
 	"ultraball": {
 		id: "ultraball",
@@ -5481,6 +5531,18 @@ exports.BattleItems = {
 		num: 2,
 		gen: 1,
 		desc: "An ultra-performance Ball that provides a higher catch rate than a Great Ball.",
+	},
+	"ultranecroziumz": {
+		id: "ultranecroziumz",
+		name: "Ultranecrozium Z",
+		spritenum: 687,
+		onTakeItem: false,
+		zMove: "Light That Burns the Sky",
+		zMoveFrom: "Photon Geyser",
+		zMoveUser: ["Necrozma-Ultra"],
+		num: 923,
+		gen: 7,
+		desc: "Dusk Mane/Dawn Wings Necrozma: Ultra Burst, then Z-Move w/ Photon Geyser.",
 	},
 	"venusaurite": {
 		id: "venusaurite",
@@ -5494,7 +5556,7 @@ exports.BattleItems = {
 		},
 		num: 659,
 		gen: 6,
-		desc: "If holder is a Venusaur, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Venusaur, this item allows it to Mega Evolve in battle.",
 	},
 	"wacanberry": {
 		id: "wacanberry",
@@ -5526,7 +5588,7 @@ exports.BattleItems = {
 		spritenum: 528,
 		isGem: true,
 		onSourceTryPrimaryHit: function (target, source, move) {
-			if (target === source || move.category === 'Status' || move.id in {firepledge:1, grasspledge:1, waterpledge:1}) return;
+			if (target === source || move.category === 'Status' || ['firepledge', 'grasspledge', 'waterpledge'].includes(move.id)) return;
 			if (move.type === 'Water') {
 				if (source.useItem()) {
 					this.add('-enditem', source, 'Water Gem', '[from] gem', '[move] ' + move.name);
@@ -5606,6 +5668,7 @@ exports.BattleItems = {
 		fling: {
 			basePower: 80,
 		},
+		onHitPriority: 1,
 		onHit: function (target, source, move) {
 			if (target.hp && move.category !== 'Status' && !move.damage && !move.damageCallback && move.typeMod > 0 && target.useItem()) {
 				this.boost({atk: 2, spa: 2});
@@ -5647,6 +5710,7 @@ exports.BattleItems = {
 				}
 				if (activate) {
 					pokemon.setBoost(boosts);
+					this.add('-clearnegativeboost', pokemon, '[silent]');
 				}
 			},
 		},
@@ -5997,30 +6061,30 @@ exports.BattleItems = {
 			type: "Fighting",
 		},
 		onUpdate: function (pokemon) {
-			let move = pokemon.getMoveData(pokemon.lastMove);
-			if (move && move.pp === 0) {
+			let moveSlot = pokemon.lastMove && pokemon.getMoveData(pokemon.lastMove.id);
+			if (moveSlot && moveSlot.pp === 0) {
 				pokemon.addVolatile('leppaberry');
-				pokemon.volatiles['leppaberry'].move = move;
+				pokemon.volatiles['leppaberry'].moveSlot = moveSlot;
 				pokemon.eatItem();
 			}
 		},
 		onEat: function (pokemon) {
-			let move;
+			let moveSlot;
 			if (pokemon.volatiles['leppaberry']) {
-				move = pokemon.volatiles['leppaberry'].move;
+				moveSlot = pokemon.volatiles['leppaberry'].moveSlot;
 				pokemon.removeVolatile('leppaberry');
 			} else {
 				let pp = 99;
-				for (let moveid in pokemon.moveset) {
-					if (pokemon.moveset[moveid].pp < pp) {
-						move = pokemon.moveset[moveid];
-						pp = move.pp;
+				for (const possibleMoveSlot of pokemon.moveSlots) {
+					if (possibleMoveSlot.pp < pp) {
+						moveSlot = possibleMoveSlot;
+						pp = moveSlot.pp;
 					}
 				}
 			}
-			move.pp += 5;
-			if (move.pp > move.maxpp) move.pp = move.maxpp;
-			this.add('-activate', pokemon, 'item: Leppa Berry', move.move);
+			moveSlot.pp += 5;
+			if (moveSlot.pp > moveSlot.maxpp) moveSlot.pp = moveSlot.maxpp;
+			this.add('-activate', pokemon, 'item: Leppa Berry', moveSlot.move);
 			if (pokemon.item !== 'leppaberry') {
 				let foeActive = pokemon.side.foe.active;
 				let foeIsStale = false;
@@ -6132,6 +6196,6 @@ exports.BattleItems = {
 		num: -1,
 		gen: 6,
 		isNonstandard: true,
-		desc: "If holder is a Crucibelle, this item allows it to Mega Evolve in battle.",
+		desc: "If held by a Crucibelle, this item allows it to Mega Evolve in battle.",
 	},
 };

@@ -3,8 +3,8 @@
 exports.BattleAbilities = {
 	"angerpoint": {
 		inherit: true,
-		desc: "If this Pokemon, or its Substitute, is struck by a Critical Hit, its Attack is boosted to six stages.",
-		shortDesc: "If this Pokemon is hit by a critical hit, its Attack is boosted by 12.",
+		desc: "If this Pokemon, or its substitute, is struck by a critical hit, its Attack is raised by 12 stages.",
+		shortDesc: "If this Pokemon or its substitute takes a critical hit, its Attack is raised 12 stages.",
 		onAfterSubDamage: function (damage, target, source, move) {
 			if (!target.hp) return;
 			if (move && move.effectType === 'Move' && move.crit) {
@@ -12,6 +12,22 @@ exports.BattleAbilities = {
 				this.add('-setboost', target, 'atk', 12, '[from] ability: Anger Point');
 			}
 		},
+		rating: 1.5,
+	},
+	"blaze": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Fire-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Fire-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Fire' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Blaze boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "blaze",
+		name: "Blaze",
+		rating: 2,
+		num: 66,
 	},
 	"effectspore": {
 		inherit: true,
@@ -28,8 +44,28 @@ exports.BattleAbilities = {
 			}
 		},
 	},
+	"flashfire": {
+		inherit: true,
+		effect: {
+			noCopy: true, // doesn't get copied by Baton Pass
+			onStart: function (target) {
+				this.add('-start', target, 'ability: Flash Fire');
+			},
+			onModifyDamagePhase1: function (atk, attacker, defender, move) {
+				if (move.type === 'Fire') {
+					this.debug('Flash Fire boost');
+					return this.chainModify(1.5);
+				}
+			},
+			onEnd: function (target) {
+				this.add('-end', target, 'ability: Flash Fire', '[silent]');
+			},
+		},
+	},
 	"flowergift": {
 		inherit: true,
+		desc: "If Sunny Day is active, the Attack and Special Defense of this Pokemon and its allies are multiplied by 1.5.",
+		shortDesc: "If Sunny Day is active, Attack and Sp. Def of this Pokemon and its allies are 1.5x.",
 		onAllyModifyAtk: function (atk) {
 			if (this.isWeather('sunnyday')) {
 				return this.chainModify(1.5);
@@ -44,13 +80,12 @@ exports.BattleAbilities = {
 	"forewarn": {
 		inherit: true,
 		onStart: function (pokemon) {
-			let targets = pokemon.side.foe.active;
 			let warnMoves = [];
 			let warnBp = 1;
-			for (let i = 0; i < targets.length; i++) {
-				if (targets[i].fainted) continue;
-				for (let j = 0; j < targets[i].moveset.length; j++) {
-					let move = this.getMove(targets[i].moveset[j].move);
+			for (const target of pokemon.side.foe.active) {
+				if (target.fainted) continue;
+				for (const moveSlot of target.moveSlots) {
+					let move = this.getMove(moveSlot.move);
 					let bp = move.basePower;
 					if (move.ohko) bp = 160;
 					if (move.id === 'counter' || move.id === 'metalburst' || move.id === 'mirrorcoat') bp = 120;
@@ -68,8 +103,14 @@ exports.BattleAbilities = {
 			this.add('-activate', pokemon, 'ability: Forewarn', warnMove);
 		},
 	},
+	"insomnia": {
+		inherit: true,
+		rating: 2.5,
+	},
 	"leafguard": {
 		inherit: true,
+		desc: "If Sunny Day is active, this Pokemon cannot gain a major status condition, but can use Rest normally.",
+		shortDesc: "If Sunny Day is active, this Pokemon cannot be statused, but Rest works normally.",
 		onSetStatus: function (status, target, source, effect) {
 			if (effect && effect.id === 'rest') {
 				return;
@@ -80,14 +121,14 @@ exports.BattleAbilities = {
 	},
 	"lightningrod": {
 		inherit: true,
-		desc: "During double battles, this Pokemon draws any single-target Electric-type attack to itself. If an opponent uses an Electric-type attack that affects multiple Pokemon, those targets will be hit. This ability does not affect Electric Hidden Power or Judgment.",
-		shortDesc: "This Pokemon draws Electric moves to itself.",
+		desc: "If this Pokemon is not the target of a single-target Electric-type move used by another Pokemon, this Pokemon redirects that move to itself.",
+		shortDesc: "This Pokemon draws single-target Electric moves to itself.",
 		onTryHit: function () {},
 		rating: 0,
 	},
 	"magicguard": {
-		//desc: "",
-		shortDesc: "This Pokemon can only be damaged by direct attacks.",
+		desc: "This Pokemon can only be damaged by direct attacks. Curse and Substitute on use, Belly Drum, Pain Split, Struggle recoil, and confusion damage are considered direct damage. This Pokemon cannot lose its turn because of paralysis, and is unaffected by Toxic Spikes on switch-in.",
+		shortDesc: "This Pokemon can only be damaged by direct attacks, and can't be fully paralyzed.",
 		onDamage: function (damage, target, source, effect) {
 			if (effect.effectType !== 'Move') {
 				return false;
@@ -104,15 +145,15 @@ exports.BattleAbilities = {
 		num: 98,
 	},
 	"minus": {
-		desc: "This Pokemon's Special Attack receives a 50% boost in double battles if its partner has the Plus ability.",
-		shortDesc: "If an ally has the Plus Ability, this Pokemon's Sp. Atk is 1.5x.",
+		desc: "If an active ally has the Ability Plus, this Pokemon's Special Attack is multiplied by 1.5.",
+		shortDesc: "If an active ally has the Ability Plus, this Pokemon's Sp. Atk is 1.5x.",
 		onModifySpA: function (spa, pokemon) {
 			let allyActive = pokemon.side.active;
 			if (allyActive.length === 1) {
 				return;
 			}
-			for (let i = 0; i < allyActive.length; i++) {
-				if (allyActive[i] && allyActive[i].position !== pokemon.position && !allyActive[i].fainted && allyActive[i].ability === 'plus') {
+			for (const ally of allyActive) {
+				if (ally && ally.position !== pokemon.position && !ally.fainted && ally.ability === 'plus') {
 					return spa * 1.5;
 				}
 			}
@@ -143,24 +184,39 @@ exports.BattleAbilities = {
 			}
 		},
 	},
+	"overgrow": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Grass-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Grass-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Grass' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Overgrow boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "overgrow",
+		name: "Overgrow",
+		rating: 2,
+		num: 65,
+	},
 	"pickup": {
-		desc: "No in-battle effect.",
-		shortDesc: "No in-battle effect.",
+		desc: "No competitive use.",
+		shortDesc: "No competitive use.",
 		id: "pickup",
 		name: "Pickup",
 		rating: 0,
 		num: 53,
 	},
 	"plus": {
-		desc: "This Pokemon's Special Attack receives a 50% boost in double battles if its partner has the Minus ability.",
-		shortDesc: "If an ally has the Minus Ability, this Pokemon's Sp. Atk is 1.5x.",
+		desc: "If an active ally has the Ability Minus, this Pokemon's Special Attack is multiplied by 1.5.",
+		shortDesc: "If an active ally has the Ability Minus, this Pokemon's Sp. Atk is 1.5x.",
 		onModifySpA: function (spa, pokemon) {
 			let allyActive = pokemon.side.active;
 			if (allyActive.length === 1) {
 				return;
 			}
-			for (let i = 0; i < allyActive.length; i++) {
-				if (allyActive[i] && allyActive[i].position !== pokemon.position && !allyActive[i].fainted && allyActive[i].ability === 'minus') {
+			for (const ally of allyActive) {
+				if (ally && ally.position !== pokemon.position && !ally.fainted && ally.ability === 'minus') {
 					return spa * 1.5;
 				}
 			}
@@ -190,14 +246,14 @@ exports.BattleAbilities = {
 		onModifyMove: function (move) {
 			if (move.secondaries) {
 				this.debug('doubling secondary chance');
-				for (let i = 0; i < move.secondaries.length; i++) {
-					move.secondaries[i].chance *= 2;
+				for (const secondary of move.secondaries) {
+					secondary.chance *= 2;
 				}
 			}
 		},
 	},
 	"simple": {
-		shortDesc: "If this Pokemon's stat stages are raised or lowered, the effect is doubled instead.",
+		shortDesc: "This Pokemon's stat stages are considered doubled during stat calculations.",
 		onModifyBoost: function (boosts) {
 			for (let key in boosts) {
 				boosts[key] *= 2;
@@ -209,8 +265,8 @@ exports.BattleAbilities = {
 		num: 86,
 	},
 	"stench": {
-		desc: "No in-battle effect.",
-		shortDesc: "No in-battle effect.",
+		desc: "No competitive use.",
+		shortDesc: "No competitive use.",
 		id: "stench",
 		name: "Stench",
 		rating: 0,
@@ -228,17 +284,36 @@ exports.BattleAbilities = {
 	},
 	"stormdrain": {
 		inherit: true,
-		desc: "During double battles, this Pokemon draws any single-target Water-type attack to itself. If an opponent uses an Water-type attack that affects multiple Pokemon, those targets will be hit. This ability does not affect Water Hidden Power, Judgment or Weather Ball.",
-		shortDesc: "This Pokemon draws Water moves to itself.",
+		desc: "If this Pokemon is not the target of a single-target Water-type move used by another Pokemon, this Pokemon redirects that move to itself.",
+		shortDesc: "This Pokemon draws single-target Water moves to itself.",
 		onTryHit: function () {},
 		rating: 0,
 	},
 	"sturdy": {
 		inherit: true,
+		desc: "OHKO moves fail when used against this Pokemon.",
+		shortDesc: "OHKO moves fail when used against this Pokemon.",
 		onDamage: function () {},
+		rating: 0,
+	},
+	"swarm": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Bug-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Bug-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Bug' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Swarm boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "swarm",
+		name: "Swarm",
+		rating: 2,
+		num: 68,
 	},
 	"synchronize": {
 		inherit: true,
+		desc: "If another Pokemon burns, paralyzes, or poisons this Pokemon, that Pokemon receives the same major status condition. If another Pokemon badly poisons this Pokemon, that Pokemon becomes poisoned.",
 		onAfterSetStatus: function (status, target, source, effect) {
 			if (!source || source === target) return;
 			if (effect && effect.id === 'toxicspikes') return;
@@ -248,6 +323,21 @@ exports.BattleAbilities = {
 			source.trySetStatus(id);
 		},
 	},
+	"torrent": {
+		desc: "When this Pokemon has 1/3 or less of its maximum HP, rounded down, its Water-type attacks have their power multiplied by 1.5.",
+		shortDesc: "At 1/3 or less of its max HP, this Pokemon's Water-type attacks have 1.5x power.",
+		onBasePowerPriority: 2,
+		onBasePower: function (basePower, attacker, defender, move) {
+			if (move.type === 'Water' && attacker.hp <= attacker.maxhp / 3) {
+				this.debug('Torrent boost');
+				return this.chainModify(1.5);
+			}
+		},
+		id: "torrent",
+		name: "Torrent",
+		rating: 2,
+		num: 67,
+	},
 	"trace": {
 		inherit: true,
 		onUpdate: function (pokemon) {
@@ -255,8 +345,8 @@ exports.BattleAbilities = {
 			let target = pokemon.side.foe.randomActive();
 			if (!target || target.fainted) return;
 			let ability = this.getAbility(target.ability);
-			let bannedAbilities = {forecast:1, multitype:1, trace:1};
-			if (bannedAbilities[target.ability]) {
+			let bannedAbilities = ['forecast', 'multitype', 'trace'];
+			if (bannedAbilities.includes(target.ability)) {
 				return;
 			}
 			if (pokemon.setAbility(ability)) {
@@ -264,8 +354,13 @@ exports.BattleAbilities = {
 			}
 		},
 	},
+	"vitalspirit": {
+		inherit: true,
+		rating: 2.5,
+	},
 	"wonderguard": {
 		inherit: true,
+		shortDesc: "This Pokemon is only damaged by Fire Fang, supereffective moves, indirect damage.",
 		onTryHit: function (target, source, move) {
 			if (target === source || move.category === 'Status' || move.type === '???' || move.id === 'struggle' || move.id === 'firefang') return;
 			this.debug('Wonder Guard immunity: ' + move.id);
