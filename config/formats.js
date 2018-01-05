@@ -544,6 +544,17 @@ exports.Formats = [
 		mod: 'typescramble',
 		gameType: 'doubles',
 		banlist: [],
+    onModifyTemplate: function(template, pokemon, source) {
+      //console.log(source);
+      this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+      return Object.assign({}, template, {types: pokemon.types});
+    },
+    onAfterMega: function(pokemon) {
+      this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+    },
+    onSwitchIn: function(pokemon) {
+      this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+    },
 		onResidual: function(battle) {
 			let mons = [];
 			mons.push(battle.p1.active[0]);
@@ -552,7 +563,7 @@ exports.Formats = [
 			mons.push(battle.p2.active[1]);
 			for (let i = 0; i < mons.length; i++) {
 				let pokemon = mons[i];
-				console.log("Mon " + pokemon.id);
+				//console.log("Mon " + pokemon.id);
 				if ((!pokemon.hp || pokemon.hp < 0) || 
             pokemon.volatiles && (pokemon.volatiles['conversion'] || pokemon.volatiles['conversion2'] || pokemon.volatiles['soak'])) 
               continue;
@@ -601,6 +612,17 @@ exports.Formats = [
 		mod: 'typescramble',
 		gameType: 'doubles',
 		banlist: [],
+    onModifyTemplate: function(template, pokemon, source) {
+      //console.log(source);
+      this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+      return Object.assign({}, template, {types: pokemon.types});
+    },
+    onAfterMega: function(pokemon) {
+      this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+    },
+    onSwitchIn: function(pokemon) {
+      this.add('-start', pokemon, 'typechange', pokemon.types.join('/'), '[silent]');
+    },
 		onResidual: function(battle) {
 			let mons = [];
 			mons.push(battle.p1.active[0]);
